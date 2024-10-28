@@ -21,7 +21,7 @@ export async function calcPackages() {
     const game = bcGame.find(game => game.id === offer.game_id);
     const pkg = bcStreamingPackage.find(pkg => pkg.streaming_package_id === offer.streaming_package_id);
     return { ...game, ...offer, ...pkg };
-  }).filter(row => row !== null) as any[]; // Filter out null values
+  }).filter(row => row !== null) as any[];
 
   console.log('mergedData (before filtering): ', mergedData);
 

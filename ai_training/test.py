@@ -14,7 +14,7 @@ merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
 merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
 
 # Filter for specific teams
-teams = ['Bayern München']
+teams = ['Bayern München', 'Borussia Dortmund', 'Hamburger SV', '1860 München', 'Real Madrid', 'Liverpool FC', 'Ajax Amsterdam', 'FC Porto']
 merged_data = merged_data[merged_data['team_home'].isin(teams) | merged_data['team_away'].isin(teams)]
 
 # Filter for live games only
@@ -29,8 +29,6 @@ def solve_optimization(merged_data, price_column):
 
     # Define the objective function (minimize total cost)
     problem += lpSum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id][price_column].iloc[0] for pkg_id in package_vars])
-
-    print(problem.objective)
 
     # Define the constraints (cover all selected games)
     for game_id in merged_data['game_id'].unique():
@@ -63,6 +61,9 @@ def solve_optimization(merged_data, price_column):
     # Remove redundant packages from chosen packages
     final_packages = [pkg for pkg in chosen_packages if pkg not in redundant_packages]
 
+    # Convert package IDs to standard Python integers
+    final_packages = [int(pkg) for pkg in final_packages]
+
     # Calculate total cost
     total_cost = sum(merged_data[merged_data['streaming_package_id'] == pkg][price_column].iloc[0] for pkg in final_packages)
 
@@ -74,10 +75,12 @@ def solve_optimization(merged_data, price_column):
 # Solve for the lowest monthly price
 merged_data_monthly = merged_data.dropna(subset=['monthly_price_cents'])
 chosen_packages_monthly, total_cost_monthly = solve_optimization(merged_data_monthly, 'monthly_price_cents')
-print('Chosen Packages for Lowest Monthly Price:', chosen_packages_monthly)
-print('Total Monthly Cost:', total_cost_monthly)
 
 # Solve for the lowest yearly price without filtering out packages not available for monthly payment
 chosen_packages_yearly, total_cost_yearly = solve_optimization(merged_data, 'monthly_price_yearly_subscription_in_cents')
+
+# Print Packages and Prices
+print('Chosen Packages for Lowest Monthly Price:', chosen_packages_monthly)
+print('Total Monthly Cost:', total_cost_monthly)
 print('Chosen Packages for Lowest Yearly Price:', chosen_packages_yearly)
 print('Total Yearly Cost:', total_cost_yearly)

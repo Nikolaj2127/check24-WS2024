@@ -10,6 +10,9 @@ bc_streaming_package = pd.read_csv('../public/data/bc_streaming_package.csv')
 # Rename 'id' column to 'game_id' in bc_game
 bc_game.rename(columns={'id': 'game_id'}, inplace=True)
 
+# Add 'month' column to bc_game based on 'date' column
+bc_game['month'] = pd.to_datetime(bc_game['date']).dt.month
+
 # Merge datasets
 merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
 merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
@@ -23,71 +26,52 @@ merged_data = merged_data[merged_data['live'] == 1]
 
 def solve_optimization(merged_data, price_column):
     # Optimization: Select the best combination of packages to cover all games
-    problem = LpProblem("Minimize_Cost", LpMinimize)
+    packages = merged_data['streaming_package_id'].unique()
+    games = merged_data['game_id'].unique()
 
-    # Define the decision variables
-    package_vars = {pkg_id: LpVariable(f'Package_{pkg_id}', cat='Binary') for pkg_id in merged_data['streaming_package_id'].unique()}
+    # Define the problem
+    prob = LpProblem("MinimizeCost", LpMinimize)
 
-    # Define the objective function (minimize total cost)
-    problem += lpSum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id][price_column].iloc[0] for pkg_id in package_vars])
+    # Define variables
+    package_vars = LpVariable.dicts("Package", packages, 0, 1, cat='Binary')
 
-    # Define the constraints (cover all selected games)
-    for game_id in merged_data['game_id'].unique():
-        relevant_packages = merged_data[merged_data['game_id'] == game_id]['streaming_package_id']
-        problem += lpSum([package_vars[pkg_id] for pkg_id in relevant_packages]) >= 1
+    # Objective function: Minimize the total cost
+    prob += lpSum([merged_data[merged_data['streaming_package_id'] == pkg][price_column].iloc[0] * package_vars[pkg] for pkg in packages])
 
-    # Solve the optimization problem
-    problem.solve()
+    # Constraints: Each game must be covered by at least one package
+    for game in games:
+        prob += lpSum([package_vars[pkg] for pkg in packages if game in merged_data[merged_data['streaming_package_id'] == pkg]['game_id'].values]) >= 1
 
-    # Extract chosen packages
-    chosen_packages = [pkg_id for pkg_id in package_vars if package_vars[pkg_id].varValue == 1]
+    # Solve the problem
+    prob.solve()
 
-    # Check for redundant packages
-    redundant_packages = []
-    for pkg_id in chosen_packages:
-        # Temporarily remove the package
-        temp_chosen_packages = [p for p in chosen_packages if p != pkg_id]
-        
-        # Check if all games are still covered
-        all_covered = True
-        for game_id in merged_data['game_id'].unique():
-            relevant_packages = merged_data[merged_data['game_id'] == game_id]['streaming_package_id']
-            if not any(pkg in temp_chosen_packages for pkg in relevant_packages):
-                all_covered = False
-                break
-        
-        if all_covered:
-            redundant_packages.append(pkg_id)
+    # Get the chosen packages and total cost
+    chosen_packages = [pkg for pkg in packages if package_vars[pkg].varValue == 1]
+    total_cost = sum([merged_data[merged_data['streaming_package_id'] == pkg][price_column].iloc[0] for pkg in chosen_packages])
 
-    # Remove redundant packages from chosen packages
-    final_packages = [pkg for pkg in chosen_packages if pkg not in redundant_packages]
+    return chosen_packages, total_cost
 
-    # Calculate total cost
-    total_cost = sum(merged_data[merged_data['streaming_package_id'] == pkg][price_column].iloc[0] for pkg in final_packages)
+# Solve for the lowest monthly price
+merged_data_monthly = merged_data.dropna(subset=['monthly_price_cents'])
+chosen_packages_monthly, total_cost_monthly = solve_optimization(merged_data_monthly, 'monthly_price_cents')
+print('Chosen Packages for Lowest Monthly Price:', chosen_packages_monthly)
+print('Total Monthly Cost:', total_cost_monthly)
 
-    print("Chosen Packages:", final_packages)
-    print("Removed Redundant Packages:", redundant_packages)
+# Solve for the lowest yearly price without filtering out packages not available for monthly payment
+chosen_packages_yearly, total_cost_yearly = solve_optimization(merged_data, 'monthly_price_yearly_subscription_in_cents')
+print('Chosen Packages for Lowest Yearly Price:', chosen_packages_yearly)
+print('Total Yearly Cost:', total_cost_yearly)
 
-    return final_packages, total_cost
-
-# Group games by month
-merged_data['month'] = pd.to_datetime(merged_data['starts_at']).dt.to_period('M')
-monthly_groups = merged_data.groupby('month')
-
-total_cost_monthly = 0
-all_chosen_packages_monthly = []
+# Combine monthly and yearly options
+all_chosen_packages = set(chosen_packages_monthly + chosen_packages_yearly)
 monthly_costs = []
 monthly_chosen_packages = []
 
-# Solve for each month separately
-for month, group in monthly_groups:
-    group = group.dropna(subset=['monthly_price_cents'])
-    chosen_packages, cost = solve_optimization(group, 'monthly_price_cents')
-    total_cost_monthly += cost
-    all_chosen_packages_monthly.extend(chosen_packages)
-    monthly_costs.append((month, cost))
+for month in range(1, 13):
+    month_data = merged_data[merged_data['game_id'].isin(bc_game[bc_game['month'] == month]['game_id'])]
+    chosen_packages, total_cost = solve_optimization(month_data, 'monthly_price_cents')
+    monthly_costs.append((month, total_cost))
     monthly_chosen_packages.append((month, chosen_packages))
-    print(f'Chosen Packages for {month}:', chosen_packages)
 
 # Convert Period objects to strings for plotting
 months, costs = zip(*monthly_costs)
@@ -106,6 +90,22 @@ for i, (month, chosen_packages) in enumerate(monthly_chosen_packages):
     plt.annotate(', '.join(map(str, chosen_packages)), (months[i], costs[i]), textcoords="offset points", xytext=(0,10), ha='center')
 
 # Add legend with package prices and total cost
+package_prices = {pkg_id: merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_cents'].iloc[0] for pkg_id in all_chosen_packages}
+legend_text = '\n'.join([f'Package {pkg_id}: {price} cents' for pkg_id, price in package_prices.items()])
+legend_text += f'\nTotal Monthly Cost: {total_cost_monthly} cents'
+plt.legend([legend_text], loc='upper left', bbox_to_anchor=(1, 1))
+
+plt.show()
+
+# Plot the cumulative cost over time
+cumulative_costs = [sum(costs[:i+1]) for i in range(len(costs))]
+plt.figure(figsize=(10, 5))
+plt.plot(months, cumulative_costs, marker='o', linestyle='-', color='g', label='Cumulative Cost')
+plt.xlabel('Month')
+plt.ylabel('Cumulative Cost (Cents)')
+plt.title('Cumulative Costs Over Time')
+plt.grid(True)
+plt.show()# Add legend with package prices and total cost
 package_prices = {pkg_id: merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_cents'].iloc[0] for pkg_id in all_chosen_packages_monthly}
 legend_text = '\n'.join([f'Package {pkg_id}: {price} cents' for pkg_id, price in package_prices.items()])
 legend_text += f'\nTotal Monthly Cost: {total_cost_monthly} cents'

@@ -4,6 +4,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { calcPackages } from '../components/calcPackages';
+import { calcPackages_test } from '../components/calcPackages_test';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -36,13 +37,7 @@ function a11yProps(index: number) {
 
 export default function Homepage () {
   const [value, setValue] = React.useState(0)
-  const packages = calcPackages()
-
-  React.useEffect(() => {
-    const fetchPackages = async () => {
-      const result = await calcPackages()
-    }
-  }, [])
+  const packages = calcPackages_test()
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
