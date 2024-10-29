@@ -1,19 +1,25 @@
-import { merge } from 'danfojs';
 import { fetchData, bc_game, bc_streaming_offer, bc_streaming_package } from './fetchData';
+import { greedyAlgorithm } from './greedyAlgorithm';
 import { lpSolver, mergedData } from './lpSolver';
 
 export async function calcPackages_test() {
     const teams = ["Bayern München", "FC Barcelona"]
+
+    console.time('Fetch Data')
     // Load the CSV data
     const bcGame = await fetchData("bc_game") as bc_game[];
     const bcStreamingOffer = await fetchData("bc_streaming_offer") as bc_streaming_offer[];
     const bcStreamingPackage = await fetchData("bc_streaming_package") as bc_streaming_package[];
+
+    console.timeEnd('Fetch Data')
 
     // Rename 'id' column to 'streaming_package_id' in bcStreamingPackage
   bcStreamingPackage.forEach(row => {
     (row as any).streaming_package_id = row.id; // Use type assertion
     delete row.id;
   });
+
+  console.time('Merge Data')
 
   // Merge datasets
   let mergedData = bcStreamingOffer.map(offer => {
@@ -24,12 +30,15 @@ export async function calcPackages_test() {
     return mergedRow;
   }).filter(row => row !== null) as any[];
 
+  console.timeEnd('Merge Data')
 
   // Filter out packages not available for monthly payment
   mergedData = mergedData.filter(row => row.live === 1)
-  //mergedData = mergedData.filter(row => teams.includes(row.team_home) || teams.includes(row.team_away) )
+  mergedData = mergedData.filter(row => teams.includes(row.team_home) || teams.includes(row.team_away) )
 
-  lpSolver(mergedData as mergedData[], 'yearly')
+  greedyAlgorithm(mergedData as mergedData[], 'yearly')
+
+  //lpSolver(mergedData as mergedData[], 'yearly')
   
 }
   

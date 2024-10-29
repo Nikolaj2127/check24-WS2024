@@ -5,6 +5,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { calcPackages } from '../components/calcPackages';
 import { calcPackages_test } from '../components/calcPackages_test';
+import { greedyAlgorithm } from '../components/greedyAlgorithm';
 
 interface TabPanelProps {
   children?: React.ReactNode;
