@@ -1,13 +1,11 @@
 import { mergedData } from './lpSolver';
 
 export async function greedyAlgorithm(mergedData: mergedData[], subscriptionPayment: string) {
+    const greedyData = mergedData.map(({ highlights, live, name, starts_at, team_away, team_home, tournament_name, ...rest }) => rest)
 
-
-    let monthlyGreedyData: mergedData[]
+    let monthlyGreedyData
     if(subscriptionPayment === 'monthly') {
-        monthlyGreedyData = mergedData.filter(row => row.monthly_price_cents !== null);
-
-        console.log(monthlyGreedyData.filter(row => row.streaming_package_id === 2))
+        monthlyGreedyData = greedyData.filter(row => row.monthly_price_cents !== null);
 
         // Greedy Algorithm: Select the cheapest packages to cover all games
         const packages = Array.from(new Set(monthlyGreedyData.map(row => row.streaming_package_id)));
@@ -43,6 +41,8 @@ export async function greedyAlgorithm(mergedData: mergedData[], subscriptionPaym
 
         console.log('Total Cost of Selected Packages:', totalCost);
     } else if (subscriptionPayment === 'yearly') {
+
+        console.log('filtered', greedyData.filter(row => row.streaming_package_id === 2))
         // Greedy Algorithm: Select the cheapest packages to cover all games
         const packages = Array.from(new Set(mergedData.map(row => row.streaming_package_id)));
         const games = Array.from(new Set(mergedData.map(row => row.game_id)));

@@ -42,6 +42,7 @@ const bc_streaming_package_columns: readonly bc_streaming_package_Column[] = [
 ]
 
 export default function DataTable({ filename }: {filename: string}) {
+  const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<bc_game[] | bc_streaming_package[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -50,6 +51,7 @@ export default function DataTable({ filename }: {filename: string}) {
     const getData = async () => {
       const result = await fetchData(filename)
       setRows(result as bc_game[] | bc_streaming_package[])
+      setLoading(false);
     }
     getData()
   }, [])
@@ -71,11 +73,14 @@ export default function DataTable({ filename }: {filename: string}) {
     return (row as bc_streaming_package).id !== undefined
   }
 
+  if (loading) {
+    return <div></div>;
+  }
 
   return (
     <div>
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-        <TableContainer sx={{ maxHeight: 800 }}>
+      <Paper sx={{ width: '100%', overflow: 'hidden', border: '5px solid darkblue', borderRadius: '15px' }}>
+        <TableContainer sx={{ maxHeight: '100%' }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
             {filename === 'bc_game' ? (

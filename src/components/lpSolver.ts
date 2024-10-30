@@ -25,11 +25,9 @@ interface solverData {
 }
 
 export async function lpSolver(data: mergedData[], subscriptionPayment: string) {
-    console.time('lpSolver');
     const glpk = await GLPK();
     const solverData = data.map(({ highlights, live, name, starts_at, team_away, team_home, tournament_name, ...rest }) => rest) as solverData[];
 
-    console.log(solverData)
 
     // Filter data based on the subscription payment method
     let monthlysolverData: solverData[];
@@ -62,9 +60,6 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
     const uniqueGameIds = Array.from(new Set(monthlysolverData.map(item => item.game_id)));
     const uniqueStreamingPackageIds = Array.from(new Set(solverData.map(item => item.streaming_package_id)));
 
-    console.log(uniqueGameIds)
-
-    console.time('Constraints')
     // Define contstraints for the LP problem
     const constraints = uniqueGameIds.map(game_id => {
         const vars = uniqueStreamingPackageIds.map(streaming_package_id => {
@@ -77,9 +72,7 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
             bnds: { type: glpk.GLP_LO, lb: 1, ub: 1 }
         };
     });
-    console.timeEnd('Constraints')
 
-    console.time('Actual Solve')
     // Solve the LP problem
     const res = await glpk.solve({
         name: 'LP',
@@ -90,10 +83,6 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
         },
         subjectTo: constraints
     });
-
-    console.timeEnd('Actual Solve')
-
-    console.log(res);
 
     // Print the chosen packages
     const chosenPackages = Object.keys(res.result.vars)
@@ -106,6 +95,8 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
     });
 
     const totalPrice = chosenPackages.reduce((sum, pkg) => sum + pkg.price, 0);
+
+    return chosenPackages
 
     console.log('Chosen Packages:', chosenPackages.map(pkg => `${pkg.packageName} (${pkg.packageId}), ${pkg.price}`));
     console.log('Total Price:', totalPrice);
