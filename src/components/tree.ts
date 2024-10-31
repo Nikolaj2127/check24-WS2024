@@ -3,8 +3,8 @@ import { mergedData } from "./lpSolver";
 interface PackageData {
     price: number;
     gameIds: number[];
-    currentPackageId: number
-    packageIds: number[]
+    currentPackageId: number;
+    packageIds: number[];
 }
 
 interface SolverResult {
@@ -41,7 +41,7 @@ export function tree(data: mergedData[], subscriptionPayment: string) {
             packageMap.get(packageId)?.gameIds.push(item.game_id);
         });
     } else {
-        throw new Error ("Enter valid Subscription payment method")
+        throw new Error ("Enter valid Subscription payment method");
     }
 
     // Step 3: Transform the map into an array of package data
@@ -85,10 +85,11 @@ export function tree(data: mergedData[], subscriptionPayment: string) {
         isLeaf(uniqueGameIds: number[]): boolean {
             return this.value.gameIds.length === uniqueGameIds.length;
         }
+        
     }
 
-    // Memoization map to store already computed states
-    const memo = new Map<string, boolean>();
+    // Memoization map to store already computed states with their minimum prices
+    const memo = new Map<string, number>();
 
     // Variable to track the most optimal solution
     let optimalSolution: PackageData | null = null;
@@ -97,15 +98,25 @@ export function tree(data: mergedData[], subscriptionPayment: string) {
     function buildTree(node: TreeNode<PackageData>, remainingPackages: PackageData[], uniqueGameIds: number[]): void {
         remainingPackages.forEach(pkg => {
             const newNode = new TreeNode<PackageData>(node.mergePackageData(pkg));
-            const stateKey = JSON.stringify(newNode.value.gameIds.sort());
+            const stateKey = JSON.stringify({ gameIds: newNode.value.gameIds.sort(), price: newNode.value.price });
 
             // Check memoization map to avoid redundant calculations
             if (memo.has(stateKey)) {
+                const existingPrice = memo.get(stateKey);
+                if (existingPrice !== undefined && existingPrice <= newNode.value.price) {
+                    console.log(`Skipping state key: ${stateKey} with higher price: ${newNode.value.price}`); // Log skipped state key
+                    return;
+                }
+            }
+
+            // Early termination if the new node's price exceeds the current optimal solution
+            if (optimalSolution && newNode.value.price >= optimalSolution.price) {
+                console.log(`Pruning node with state key: ${stateKey} due to higher price: ${newNode.value.price}`);
                 return;
             }
 
-            memo.set(stateKey, true);
             node.addChild(newNode);
+            memo.set(stateKey, newNode.value.price);
 
             if (newNode.isLeaf(uniqueGameIds)) {
                 // Update the optimal solution if this leaf node is more optimal
@@ -118,23 +129,41 @@ export function tree(data: mergedData[], subscriptionPayment: string) {
         });
     }
 
-    // Example usage:
+    // Function to print all leaves with their corresponding IDs, total cost, and path
+    function printLeaves(node: TreeNode<PackageData>, path: number[] = [], totalCost: number = 0) {
+        const currentPath = [...path, node.value.currentPackageId];
+        const currentCost = totalCost + node.value.price;
+
+        // Debug: Print current node and its children
+        console.log(`Node ID: ${node.value.currentPackageId}, Children: ${node.children?.map(child => child.value.currentPackageId).join(', ') || 'None'}`);
+
+        if (!node.children || node.children.length === 0) {
+            console.log(`Leaf ID: ${node.value.currentPackageId}, Total Cost: ${currentCost}, Path: ${currentPath.join(' -> ')}`);
+        } else {
+            node.children.forEach(child => printLeaves(child, currentPath, currentCost));
+        }
+    }
+
+    // Execute function
     const uniqueGameIds = Array.from(new Set(data.map(item => item.game_id)));
     const root = new TreeNode<PackageData>({ price: 0, gameIds: [], currentPackageId: 0, packageIds: [] });
     buildTree(root, treeData, uniqueGameIds);
 
-    console.log(optimalSolution)
+    // Print all leaves
+    printLeaves(root);
+
+    console.log(optimalSolution);
 
     if (optimalSolution) {
         return (optimalSolution as PackageData).packageIds.map(id => {
             const pkg = data.find(pkg => pkg.streaming_package_id === id);
-            let price
+            let price;
             if(subscriptionPayment === 'monthly') {
-                price = pkg?.monthly_price_cents
+                price = pkg?.monthly_price_cents;
             } else if (subscriptionPayment === 'yearly') {
-                price = pkg?.monthly_price_yearly_subscription_in_cents
+                price = pkg?.monthly_price_yearly_subscription_in_cents;
             }
-            console.log(price)
+            console.log(price);
             return {
                 packageName: `Package ${id}`,
                 packageId: id.toString(),

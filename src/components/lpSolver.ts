@@ -31,14 +31,14 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
 
     // Filter data based on the subscription payment method
     let monthlysolverData: solverData[];
-    if(subscriptionPayment == 'monthly') {
+    if(subscriptionPayment === 'monthly') {
         monthlysolverData = solverData.filter(row => row.monthly_price_cents !== null);
         monthlysolverData = monthlysolverData.map(row => {
             row.price = row.monthly_price_cents;
             delete row.monthly_price_yearly_subscription_in_cents
             return row;
         });
-    } else if (subscriptionPayment == 'yearly') {
+    } else if (subscriptionPayment === 'yearly') {
         monthlysolverData = solverData;
         monthlysolverData = monthlysolverData.map(row => {
             row.price = row.monthly_price_yearly_subscription_in_cents;
@@ -49,12 +49,14 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
         throw new Error ("Enter valid Subscription payment method")
     }
 
-    const packagePrices = Array.from(new Set(solverData.map(({ streaming_package_id, price }) => 
+    const packagePrices = Array.from(new Set(monthlysolverData.map(({ streaming_package_id, price }) => 
         JSON.stringify({ streaming_package_id, price })
     ))).map(item => JSON.parse(item)).map(({ streaming_package_id, price }) => ({
         name: streaming_package_id,
         coef: price
     }));
+
+    console.log('packagePrices', packagePrices)
 
     // Extract unique game and streaming package IDs
     const uniqueGameIds = Array.from(new Set(monthlysolverData.map(item => item.game_id)));
@@ -73,6 +75,17 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
         };
     });
 
+    console.log('constraints', constraints)
+
+    const options = {
+        msglev: glpk.GLP_MSG_ALL,
+        presol: true,
+        cb: {
+            call: (res: any) => console.log(res),
+            each: 1
+        }
+    };
+
     // Solve the LP problem
     const res = await glpk.solve({
         name: 'LP',
@@ -82,7 +95,11 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
             vars: packagePrices
         },
         subjectTo: constraints
-    });
+    }, options);
+
+    
+
+    console.log('res', res)
 
     // Print the chosen packages
     const chosenPackages = Object.keys(res.result.vars)
@@ -94,11 +111,12 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
         return { packageName, packageId, price };
     });
 
-    const totalPrice = chosenPackages.reduce((sum, pkg) => sum + pkg.price, 0);
-
-    return chosenPackages
+    // Use the z value from the result as the total price
+    const totalPrice = res.result.z;
 
     console.log('Chosen Packages:', chosenPackages.map(pkg => `${pkg.packageName} (${pkg.packageId}), ${pkg.price}`));
     console.log('Total Price:', totalPrice);
     console.timeEnd('lpSolver')
+
+    return chosenPackages
 }
