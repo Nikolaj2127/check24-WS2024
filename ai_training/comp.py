@@ -15,20 +15,20 @@ merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_pac
 # Filter for live games only
 merged_data = merged_data[merged_data['live'] == 1]
 
-# Filter for Sport1 - Free-TV and MagentaTV - MegaSport
-sport1_free_tv_games = merged_data[merged_data['name'] == 'Sport1 - Free-TV']
-magenta_tv_mega_sport_games = merged_data[merged_data['name'] == 'MagentaTV - MegaSport']
+# Filter for Bildplus/Amazon - Bildplus/Amazon Prime Video and Amazon - Prime Video
+sport1_free_tv_games = merged_data[merged_data['name'] == 'Bildplus/Amazon - Bildplus/Amazon Prime Video']
+magenta_tv_mega_sport_games = merged_data[merged_data['name'] == 'Amazon - Prime Video']
 
 # Find the common game
 common_game = pd.merge(sport1_free_tv_games, magenta_tv_mega_sport_games, on='game_id')
 
 # Display the common game
-print("Common Game covered by both Sport1 - Free-TV and MagentaTV - MegaSport:")
+print("Common Game covered by both Bildplus/Amazon - Bildplus/Amazon Prime Video and Amazon - Prime Video:")
 print(common_game[['game_id', 'team_home_x', 'team_away_x']])
 
-# Find games covered by Sport1 - Free-TV but not by MagentaTV - MegaSport
+# Find games covered by Bildplus/Amazon - Bildplus/Amazon Prime Video but not by Amazon - Prime Video
 unique_sport1_games = sport1_free_tv_games[~sport1_free_tv_games['game_id'].isin(magenta_tv_mega_sport_games['game_id'])]
 
 # Display the unique games
-print("\nGames covered by Sport1 - Free-TV but not by MagentaTV - MegaSport:")
+print("\nGames covered by Bildplus/Amazon - Bildplus/Amazon Prime Video but not by Amazon - Prime Video:")
 print(unique_sport1_games[['game_id', 'team_home', 'team_away']])

@@ -50,7 +50,7 @@ export function tree(data: mergedData[], subscriptionPayment: string) {
     //console.log(treeData);
 
     class TreeNode<T extends PackageData> {
-        value: T;
+        value: T & { gameIds: number[] };
         children: TreeNode<T>[];
 
         constructor(value: T) {
@@ -129,6 +129,7 @@ export function tree(data: mergedData[], subscriptionPayment: string) {
         });
     }
 
+    /* 
     // Function to print all leaves with their corresponding IDs, total cost, and path
     function printLeaves(node: TreeNode<PackageData>, path: number[] = [], totalCost: number = 0) {
         const currentPath = [...path, node.value.currentPackageId];
@@ -142,15 +143,13 @@ export function tree(data: mergedData[], subscriptionPayment: string) {
         } else {
             node.children.forEach(child => printLeaves(child, currentPath, currentCost));
         }
-    }
+    } 
+    */
 
     // Execute function
     const uniqueGameIds = Array.from(new Set(data.map(item => item.game_id)));
     const root = new TreeNode<PackageData>({ price: 0, gameIds: [], currentPackageId: 0, packageIds: [] });
     buildTree(root, treeData, uniqueGameIds);
-
-    // Print all leaves
-    printLeaves(root);
 
     console.log(optimalSolution);
 

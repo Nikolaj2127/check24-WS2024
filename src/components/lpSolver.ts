@@ -56,8 +56,6 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
         coef: price
     }));
 
-    console.log('packagePrices', packagePrices)
-
     // Extract unique game and streaming package IDs
     const uniqueGameIds = Array.from(new Set(monthlysolverData.map(item => item.game_id)));
     const uniqueStreamingPackageIds = Array.from(new Set(solverData.map(item => item.streaming_package_id)));
@@ -71,15 +69,15 @@ export async function lpSolver(data: mergedData[], subscriptionPayment: string) 
         return {
             name: `game_${game_id}`,
             vars,
-            bnds: { type: glpk.GLP_LO, lb: 1, ub: 1 }
+            bnds: { type: glpk.GLP_FX, lb: 1, ub: 1 }
         };
     });
-
-    console.log('constraints', constraints)
 
     const options = {
         msglev: glpk.GLP_MSG_ALL,
         presol: true,
+        tm_lim: 100000,
+        it_lim: 1,
         cb: {
             call: (res: any) => console.log(res),
             each: 1
