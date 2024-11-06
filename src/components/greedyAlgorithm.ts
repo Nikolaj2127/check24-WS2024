@@ -1,4 +1,4 @@
-import { mergedData } from './lpSolver';
+import { mergedData } from './mergeData';
 
 export async function greedyAlgorithm(mergedData: mergedData[], subscriptionPayment: string) {
     const greedyData = mergedData.map(({ highlights, live, name, starts_at, team_away, team_home, tournament_name, ...rest }) => rest)

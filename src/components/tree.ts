@@ -1,4 +1,4 @@
-import { mergedData } from "./lpSolver";
+import { mergedData } from "./mergeData";
 
 interface PackageData {
     price: number;

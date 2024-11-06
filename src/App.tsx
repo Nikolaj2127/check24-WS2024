@@ -26,10 +26,18 @@ const NAVIGATION: Navigation = [
     segment: 'calculate_best_packages',
     title: 'Calculate Best Package Combination',
   },
+  {
+    kind: 'header',
+    title: 'AI Training',
+  },
+  {
+    segment: 'nNTraining',
+    title: 'Train Neural Network',
+  },
 ];
 
 const BRANDING = {
-  title: 'My Toolpad Core App',
+  title: 'Check 24 GenDev Challenge',
 };
 
 export default function App() {

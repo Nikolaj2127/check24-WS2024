@@ -1,20 +1,5 @@
-import { DateTime } from "danfojs/dist/danfojs-base/shared/types"
 import GLPK from "glpk.js"
-
-
-export interface mergedData {
-    game_id: number
-    highlights: number
-    live: number
-    monthly_price_cents: number
-    monthly_price_yearly_subscription_in_cents: number
-    name: string
-    starts_at: DateTime
-    streaming_package_id: number
-    team_away: string
-    team_home: string
-    tournament_name: string
-}
+import { mergedData } from "./mergeData"
 
 interface solverData {
     game_id: number
