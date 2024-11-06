@@ -17,13 +17,13 @@ export default function CalculateBestPackagesPage() {
 
     useEffect(() => {
         if (selectedPackages.length > 0) {
-            calcPackages_test(selectedPackages, 'monthly').then(resultMonthly => {
+            /* calcPackages_test(selectedPackages, 'monthly').then(resultMonthly => {
                 const sanitizedResults = resultMonthly.map(result => ({
                     ...result,
                     price: result.price ?? 0 // Default to 0 if price is undefined
                 }));
                 setSolverResultsMonthly(sanitizedResults); 
-            });
+            }); */
             calcPackages_test(selectedPackages, 'yearly').then(resultYearly => {
                 const sanitizedResults = resultYearly.map(result => ({
                     ...result,
@@ -42,8 +42,8 @@ export default function CalculateBestPackagesPage() {
         if (formData.get('barcelona')) selectedTeams.push('FC Barcelona');
         setSelectedPackages(selectedTeams);
 
-        const resultMonthly = calcPackages_test(selectedPackages, 'monthly')
-        console.log(resultMonthly)
+        //const resultMonthly = calcPackages_test(selectedPackages, 'monthly')
+        //console.log(resultMonthly)
         const resultYearly = calcPackages_test(selectedPackages, 'yearly')
         console.log(resultYearly)
     };
