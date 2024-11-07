@@ -26,20 +26,7 @@ bayern_games = merged_data[
     (merged_data['live'] == 1)
 ]
 
-# Games covered by package 50
-games_package_50 = bayern_games[bayern_games['streaming_package_id'] == 50]['game_id'].unique()
-
-# Games covered by package 17
-games_package_17 = bayern_games[bayern_games['streaming_package_id'] == 17]['game_id'].unique()
-
-# Games covered by package 50 but not by package 17
-games_only_in_50 = set(games_package_50) - set(games_package_17)
-
-# Get details of these games
-games_only_in_50_details = bayern_games[bayern_games['game_id'].isin(games_only_in_50)]
-print(games_only_in_50_details[['game_id', 'team_home', 'team_away']])
-
-""" def solve_optimization(merged_data, price_column):
+def solve_optimization(merged_data, price_column):
     # Optimization: Select the best combination of packages to cover all games
     problem = LpProblem("Minimize_Cost", LpMinimize)
 
@@ -102,4 +89,4 @@ chosen_packages_yearly, total_cost_yearly = solve_optimization(merged_data, 'mon
 print('Chosen Packages for Lowest Monthly Price:', chosen_packages_monthly)
 print('Total Monthly Cost:', total_cost_monthly)
 print('Chosen Packages for Lowest Yearly Price:', chosen_packages_yearly)
-print('Total Yearly Cost:', total_cost_yearly) """
+print('Total Yearly Cost:', total_cost_yearly)

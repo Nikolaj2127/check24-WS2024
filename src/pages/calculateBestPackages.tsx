@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Button, Typography, Box } from '@mui/material';
 import { DataGrid, GridColDef, GridRowId, GridToolbar } from '@mui/x-data-grid';
 import { calcPackages_test } from '../components/calcPackages_test';
-import { fetchData } from '../components/fetchData';
-import '../index.css';
+import { bc_streaming_package, fetchData } from '../components/fetchData';
+import { fetchBackendData } from '../components/fetchBackendData';
 
 const columns: GridColDef[] = [
     { field: 'team', headerName: 'Team', width: 300 }
@@ -37,7 +37,7 @@ export default function CalculateBestPackagesPage() {
             calcPackages_test(selectedPackages, 'yearly').then(resultYearly => {
                 const sanitizedResults = resultYearly.map(result => ({
                     ...result,
-                    price: result.price ?? 0 // Default to 0 if price is undefined
+                    price: result.price ?? 0
                 }));
                 setSolverResultsYearly(sanitizedResults);
             });
