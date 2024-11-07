@@ -1,93 +1,95 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import Typography from '@mui/material/Typography';
-import { FormControl, FormGroup, FormControlLabel, Checkbox, Button } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Button, Typography, Box } from '@mui/material';
+import { DataGrid, GridColDef, GridRowId, GridToolbar } from '@mui/x-data-grid';
 import { calcPackages_test } from '../components/calcPackages_test';
+import { fetchData } from '../components/fetchData';
+import '../index.css';
 
-interface SolverResult {
-    packageName: string;
-    packageId: string;
-    price: number;
-}
+const columns: GridColDef[] = [
+    { field: 'team', headerName: 'Team', width: 300 }
+];
 
 export default function CalculateBestPackagesPage() {
     const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
-    const [solverResultsMonthly, setSolverResultsMonthly] = useState<SolverResult[]>([]);
-    const [solverResultsYearly, setSolverResultsYearly] = useState<SolverResult[]>([]);
+    const [solverResultsMonthly, setSolverResultsMonthly] = useState<any[]>([]);
+    const [solverResultsYearly, setSolverResultsYearly] = useState<any[]>([]);
+    const [rows, setRows] = useState<{ id: number, team: string }[]>([]);
+    const [teams, setTeams] = useState<string[]>([]);
+    const [selectedRowIds, setSelectedRowIds] = useState<GridRowId[]>([]);
+
+    useEffect(() => {
+        const getData = async () => {
+            const result = await fetchData('teams');
+            const transformedRows = (result as string[]).map((team, index) => ({ id: index, team }));
+            setRows(transformedRows);
+        };
+        getData();
+    }, []);
+
+    useEffect(() => {
+        fetchData('teams').then((data) => {
+            setTeams(data as string[]);
+        });
+    }, []);
 
     useEffect(() => {
         if (selectedPackages.length > 0) {
-            /* calcPackages_test(selectedPackages, 'monthly').then(resultMonthly => {
-                const sanitizedResults = resultMonthly.map(result => ({
-                    ...result,
-                    price: result.price ?? 0 // Default to 0 if price is undefined
-                }));
-                setSolverResultsMonthly(sanitizedResults); 
-            }); */
             calcPackages_test(selectedPackages, 'yearly').then(resultYearly => {
                 const sanitizedResults = resultYearly.map(result => ({
                     ...result,
                     price: result.price ?? 0 // Default to 0 if price is undefined
                 }));
-                setSolverResultsYearly(sanitizedResults); 
+                setSolverResultsYearly(sanitizedResults);
             });
         }
     }, [selectedPackages]);
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const selectedTeams = [];
-        if (formData.get('bayern')) selectedTeams.push('Bayern München');
-        if (formData.get('barcelona')) selectedTeams.push('FC Barcelona');
-        setSelectedPackages(selectedTeams);
-
-        //const resultMonthly = calcPackages_test(selectedPackages, 'monthly')
-        //console.log(resultMonthly)
-        const resultYearly = calcPackages_test(selectedPackages, 'yearly')
-        console.log(resultYearly)
+    const handleSelectionChange = (rowSelectionModel: readonly GridRowId[]) => {
+        setSelectedRowIds([...rowSelectionModel]);
     };
 
-    const totalPriceMonthly = solverResultsMonthly.reduce((sum, resultYearly) => sum + resultYearly.price, 0);
-    const totalPriceYearly = solverResultsYearly.reduce((sum, resultMonthly) => sum + resultMonthly.price, 0);
+    const handleButtonClick = () => {
+        const selectedTeams = selectedRowIds.map(id => rows.find(row => row.id === id)?.team).filter(Boolean) as string[];
+        setSelectedPackages(selectedTeams);
+    };
+
+    const totalPriceMonthly = solverResultsMonthly.reduce((sum, result) => sum + result.price, 0);
+    const totalPriceYearly = solverResultsYearly.reduce((sum, result) => sum + result.price, 0);
 
     return (
         <div>
             <Typography component="div">
-                <form onSubmit={handleSubmit}>
-                    <FormControl component="fieldset">
-                        <FormGroup>
-                            <FormControlLabel
-                                control={<Checkbox name="bayern" />}
-                                label="Bayern München"
-                            />
-                            <FormControlLabel
-                                control={<Checkbox name="barcelona" />}
-                                label="FC Barcelona"
-                            />
-                        </FormGroup>
-                        <Button type="submit" variant="contained" color="primary">
-                            Submit
-                        </Button>
-                    </FormControl>
-                </form>
+                <Box sx={{ width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <DataGrid
+                            rows={rows}
+                            columns={columns}
+                            initialState={{
+                                pagination: {
+                                    paginationModel: {
+                                        pageSize: 10,
+                                    },
+                                },
+                            }}
+                            pageSizeOptions={[10]}
+                            checkboxSelection
+                            slots={{ toolbar: GridToolbar }}
+                            slotProps={{
+                            toolbar: {
+                                showQuickFilter: true,
+                            },
+                            }}
+                            onRowSelectionModelChange={(rowSelectionModel) => handleSelectionChange(rowSelectionModel)}
+                        />
+                    </div>
+                </Box>
+                <br />
+                <Button type="button" variant="contained" color="primary" onClick={handleButtonClick}>
+                    Select Teams
+                </Button>
                 <div>
-                {solverResultsYearly.length > 0 && (
-                    <div>
+                    {solverResultsYearly.length > 0 && (
                         <div>
-                            <br/>
-                            <Typography variant="h6">Solver Results Monthly:</Typography>
-                            <ul>
-                                {solverResultsMonthly.map((resultMonthly, index) => (
-                                    <li key={index}>
-                                        Package Name: {resultMonthly.packageName}, Package ID: {resultMonthly.packageId}, Price: {resultMonthly.price / 100 + " €"}
-                                    </li>
-                                ))}
-                            </ul>
-                            <Typography variant="h6">Total Price: {totalPriceMonthly / 100 + " €"}</Typography>
-                        </div>
-                        <div>
-                            <br/>
                             <Typography variant="h6">Solver Results Yearly:</Typography>
                             <ul>
                                 {solverResultsYearly.map((resultYearly, index) => (
@@ -98,8 +100,7 @@ export default function CalculateBestPackagesPage() {
                             </ul>
                             <Typography variant="h6">Total Price: {totalPriceYearly / 100 + " €"}</Typography>
                         </div>
-                    </div>
-                )}
+                    )}
                 </div>
             </Typography>
         </div>

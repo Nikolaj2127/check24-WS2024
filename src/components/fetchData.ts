@@ -23,6 +23,14 @@ export interface bc_streaming_package {
     monthly_price_yearly_subscription_in_cents: number
 }
 
+export interface teams {
+    id: number;
+    team_home: string;
+    team_away: string;
+    starts_at: string;
+    tournament_name: string;
+}
+
   const bc_gameHeaders = ['id', 'team_home', 'team_away', 'starts_at', 'tournament_name'];
   const bc_streaming_offerHeaders = ['game_id', 'streaming_package_id', 'live,highlights'];
   const bc_streaming_packageHeaders = ['id', 'name', 'monthly_price_cents', 'monthly_price_yearly_subscription_in_cents'];
@@ -119,6 +127,10 @@ export async function fetchData(filename: string) {
             console.error(error)
             throw error
         }
+    } else if (filename === 'teams') {
+        const gameData = await fetchData('bc_game') as bc_game[]
+        const uniqueTeams = Array.from(new Set(gameData.map(team => team.team_away && team.team_home)))
+        return uniqueTeams as string[]
     } else {
         throw new Error('Invalid filename')
     }
