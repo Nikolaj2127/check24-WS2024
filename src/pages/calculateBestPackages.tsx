@@ -17,6 +17,32 @@ export default function CalculateBestPackagesPage() {
     const [teams, setTeams] = useState<string[]>([]);
     const [selectedRowIds, setSelectedRowIds] = useState<GridRowId[]>([]);
 
+    const test = async (teams: string[]) => {
+        try {
+            const testResult = await fetch('http://localhost:4000/test', {
+                mode: 'cors',
+                method: 'POST',
+                body: JSON.stringify({
+                    teams: teams
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            // Log the raw response text
+            const responseText = await testResult.text();
+            console.log("Raw response text:", responseText);
+
+            // Parse the response as JSON
+            const data = JSON.parse(responseText);
+            console.log("Parsed JSON data:", data);
+            return data;
+        } catch (error) {
+            console.error("Error in test function:", error);
+        }
+    };
+
     useEffect(() => {
         const getData = async () => {
             const result = await fetchData('teams');
@@ -34,6 +60,7 @@ export default function CalculateBestPackagesPage() {
 
     useEffect(() => {
         if (selectedPackages.length > 0) {
+            test(selectedPackages)
             calcPackages_test(selectedPackages, 'yearly').then(resultYearly => {
                 const sanitizedResults = resultYearly.map(result => ({
                     ...result,
@@ -73,6 +100,7 @@ export default function CalculateBestPackagesPage() {
                             }}
                             pageSizeOptions={[10]}
                             checkboxSelection
+                            keepNonExistentRowsSelected
                             slots={{ toolbar: GridToolbar }}
                             slotProps={{
                             toolbar: {

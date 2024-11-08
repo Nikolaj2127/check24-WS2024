@@ -50,27 +50,5 @@ func main () {
 		})
 	})
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	r.GET("/solve", func(c *gin.Context) {
-		res := exec.Command("python", "./solver.py")
-		out, err := res.Output()
-		if err != nil {
-            println(err.Error())
-            c.JSON(http.StatusInternalServerError, gin.H{
-                "error": err.Error(),
-            })
-            return
-        }
-		c.JSON(http.StatusOK, gin.H{
-			"res": string(out),
-		})
-	})
-
-	
 	r.Run(":4000")
 }

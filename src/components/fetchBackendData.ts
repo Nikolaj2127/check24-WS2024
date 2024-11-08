@@ -1,8 +1,7 @@
 import { fetchData, bc_streaming_package } from "./fetchData";
 
-export async function fetchBackendData () {
+export async function fetchBackendData (teams: string[]) {
     const packages = await fetchData('bc_streaming_package') as bc_streaming_package[]
-    console.log(packages)
     let numVariables = 0;
     let numConstraints = 0;
     let solverInfo = '';
@@ -12,12 +11,24 @@ export async function fetchBackendData () {
     let price: number
 
     try {
-        const response = await fetch('http://localhost:4000/solve', {mode: 'cors'});
+        const response = await fetch('http://localhost:4000/solve', {
+            mode: 'cors', 
+            method: 'POST',
+            body: JSON.stringify({
+                teams: teams
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        
+        
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
         const lines = data.res.split('\r\n');
+        console.log(lines)
         for (const line of lines) {
             if (line.startsWith('Number of variables =')) {
               numVariables = parseInt(line.split('=')[1].trim());

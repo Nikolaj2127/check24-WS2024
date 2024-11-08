@@ -1,8 +1,10 @@
 from ortools.linear_solver import pywraplp
 import pandas as pd
 import sys
+import json
 
 input_data = sys.stdin.read()
+input_json = json.loads(input_data)
 
 # Load the CSV data
 bc_game = pd.read_csv('../public/data/bc_game.csv')
@@ -17,7 +19,10 @@ merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
 merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
 
 # Filter for specific teams
-teams = ['Bayern München', 'Borussia Dortmund', 'Hamburger SV', '1860 München', 'Real Madrid', 'Liverpool FC', 'Ajax Amsterdam', 'FC Porto']
+#teams = input_json['teams']
+teams = ['Bayern München', 'FC Barcelona']
+
+print(teams)
 #teams = ['Bayern München', 'FC Barcelona']
 merged_data = merged_data[merged_data['team_home'].isin(teams) | merged_data['team_away'].isin(teams)]
 

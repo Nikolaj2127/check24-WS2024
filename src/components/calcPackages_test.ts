@@ -14,6 +14,6 @@ export async function calcPackages_test(teams: string[], subscriptionPayment: st
 
   //return await tree(mergedData, subscriptionPayment)
   //return await lpSolver(mergedData as mergedData[], subscriptionPayment);
-  return await fetchBackendData()
+  return await fetchBackendData(teams)
 }
   
