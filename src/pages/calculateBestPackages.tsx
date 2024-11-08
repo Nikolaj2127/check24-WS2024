@@ -17,7 +17,7 @@ export default function CalculateBestPackagesPage() {
     const [teams, setTeams] = useState<string[]>([]);
     const [selectedRowIds, setSelectedRowIds] = useState<GridRowId[]>([]);
 
-    const test = async (teams: string[]) => {
+    /* const test = async (teams: string[]) => {
         try {
             const testResult = await fetch('http://localhost:4000/test', {
                 mode: 'cors',
@@ -41,7 +41,7 @@ export default function CalculateBestPackagesPage() {
         } catch (error) {
             console.error("Error in test function:", error);
         }
-    };
+    }; */
 
     useEffect(() => {
         const getData = async () => {
@@ -60,7 +60,7 @@ export default function CalculateBestPackagesPage() {
 
     useEffect(() => {
         if (selectedPackages.length > 0) {
-            test(selectedPackages)
+            //test(selectedPackages)
             calcPackages_test(selectedPackages, 'yearly').then(resultYearly => {
                 const sanitizedResults = resultYearly.map(result => ({
                     ...result,
