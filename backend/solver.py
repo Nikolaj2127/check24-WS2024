@@ -4,12 +4,12 @@ import sys
 import json
 import io
 
-input_data = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8').read()
+#input_data = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8').read()
 
-print("input Data: ", input_data)
-input_json = json.loads(input_data)
+#print("input Data: ", input_data)
+#input_json = json.loads(input_data)
 
-print("input JSON: ", input_json)
+#print("input JSON: ", input_json)
 
 # Load the CSV data
 bc_game = pd.read_csv('../public/data/bc_game.csv')
@@ -24,8 +24,8 @@ merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
 merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
 
 # Filter for specific teams
-teams = input_json['teams']
-#teams = ['Bayern München', 'FC Barcelona']
+#teams = input_json['teams']
+teams = ['Bayern München','Borussia Dortmund','Schalke 04','Hamburger SV','SG Dynamo Dresden','1860 München','Real Madrid','Liverpool FC','Paris Saint-Germain','Juventus Turin','Galatasaray SK','Ajax Amsterdam','FC Porto','FK Austria Wien','Al-Nassr FC','Inter Miami CF']
 
 print(teams)
 #teams = ['Bayern München', 'FC Barcelona']

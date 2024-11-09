@@ -27,6 +27,10 @@ const NAVIGATION: Navigation = [
     title: 'Calculate Best Package Combination',
   },
   {
+    segment: 'collections',
+    title: 'Collections',
+  },
+  {
     kind: 'header',
     title: 'AI Training',
   },

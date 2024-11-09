@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Box } from '@mui/material';
+import { Button, Typography, Box, TextField } from '@mui/material';
 import { DataGrid, GridColDef, GridRowId, GridToolbar } from '@mui/x-data-grid';
 import { calcPackages_test } from '../components/calcPackages_test';
 import { bc_streaming_package, fetchData } from '../components/fetchData';
@@ -16,32 +16,8 @@ export default function CalculateBestPackagesPage() {
     const [rows, setRows] = useState<{ id: number, team: string }[]>([]);
     const [teams, setTeams] = useState<string[]>([]);
     const [selectedRowIds, setSelectedRowIds] = useState<GridRowId[]>([]);
-
-    /* const test = async (teams: string[]) => {
-        try {
-            const testResult = await fetch('http://localhost:4000/test', {
-                mode: 'cors',
-                method: 'POST',
-                body: JSON.stringify({
-                    teams: teams
-                }),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
-
-            // Log the raw response text
-            const responseText = await testResult.text();
-            console.log("Raw response text:", responseText);
-
-            // Parse the response as JSON
-            const data = JSON.parse(responseText);
-            console.log("Parsed JSON data:", data);
-            return data;
-        } catch (error) {
-            console.error("Error in test function:", error);
-        }
-    }; */
+    const [textFieldValue, setTextFieldValue] = useState('')
+    const [textFieldError, setTextFieldError] = useState(false)
 
     useEffect(() => {
         const getData = async () => {
@@ -60,7 +36,6 @@ export default function CalculateBestPackagesPage() {
 
     useEffect(() => {
         if (selectedPackages.length > 0) {
-            //test(selectedPackages)
             calcPackages_test(selectedPackages, 'yearly').then(resultYearly => {
                 const sanitizedResults = resultYearly.map(result => ({
                     ...result,
@@ -78,6 +53,38 @@ export default function CalculateBestPackagesPage() {
     const handleButtonClick = () => {
         const selectedTeams = selectedRowIds.map(id => rows.find(row => row.id === id)?.team).filter(Boolean) as string[];
         setSelectedPackages(selectedTeams);
+    };
+
+    const handleSaveTeamsButtonClick = async () => {
+
+        if (textFieldValue.trim() === '') {
+            setTextFieldError(true);
+            return;
+        }
+
+        setTextFieldError(false);
+
+        const selectedTeams = selectedRowIds.map(id => rows.find(row => row.id === id)?.team).filter(Boolean) as string[];
+        console.log("collection Name: ", textFieldValue)
+
+        try {
+            const response = await fetch('http://localhost:4000/saveTeams', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ collectionName: textFieldValue, teams: selectedTeams }),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const result = await response.json();
+            console.log('Teams saved successfully:', result);
+        } catch (error) {
+            console.error('Error saving teams:', error);
+        }
     };
 
     const totalPriceMonthly = solverResultsMonthly.reduce((sum, result) => sum + result.price, 0);
@@ -114,6 +121,22 @@ export default function CalculateBestPackagesPage() {
                 <br />
                 <Button type="button" variant="contained" color="primary" onClick={handleButtonClick}>
                     Select Teams
+                </Button>
+                <br />
+                <br />
+                <h1>Set Collection Name</h1>
+                <br />
+                <TextField
+                    label="Team Name"
+                    value={textFieldValue}
+                    onChange={(e) => setTextFieldValue(e.target.value)}
+                    error={textFieldError}
+                    helperText={textFieldError ? 'This field is required' : ''}
+                />
+                <br />
+                <br />
+                <Button type="button" variant="contained" color="primary" onClick={handleSaveTeamsButtonClick}>
+                    Save Team Selection
                 </Button>
                 <div>
                     {solverResultsYearly.length > 0 && (
