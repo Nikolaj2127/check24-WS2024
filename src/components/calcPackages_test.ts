@@ -1,7 +1,3 @@
-import { mergedData } from './mergeData';
-import { lpSolver } from './lpSolver';
-import { tree } from './tree';
-import { predictOptimalPackages } from './neuralNetwork';
 import mergeData from './mergeData';
 import { fetchBackendData } from './fetchBackendData';
 
@@ -14,6 +10,6 @@ export async function calcPackages_test(teams: string[], subscriptionPayment: st
 
   //return await tree(mergedData, subscriptionPayment)
   //return await lpSolver(mergedData as mergedData[], subscriptionPayment);
-  return await fetchBackendData(teams)
+  return await fetchBackendData(teams, subscriptionPayment)
 }
   

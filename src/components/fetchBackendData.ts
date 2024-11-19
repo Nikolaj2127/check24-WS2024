@@ -1,21 +1,28 @@
 import { fetchData, bc_streaming_package } from "./fetchData";
 
-export async function fetchBackendData (teams: string[]) {
+export interface chosenPackages {
+  packageId: number
+  packageName: string
+  packagePrice: number
+}
+
+export async function fetchBackendData (teams: string[], subscriptionPayment: string) {
     const packages = await fetchData('bc_streaming_package') as bc_streaming_package[]
     let numVariables = 0;
     let numConstraints = 0;
     let solverInfo = '';
     let objectiveValue = 0;
-    let chosenPackages: { packageId: number, packageName: string, price: number }[] = [];
+    let chosenPackages: { packageId: number, packageName: string, packagePrice: number }[] = [];
     let packageName: string
-    let price: number
+    let packagePrice: number
 
     try {
         const response = await fetch('http://localhost:4000/solve', {
             mode: 'cors', 
             method: 'POST',
             body: JSON.stringify({
-                teams: teams
+                teams: teams,
+                payment: subscriptionPayment
             }),
             headers: {
                 "Content-Type": "application/json"
@@ -41,13 +48,19 @@ export async function fetchBackendData (teams: string[]) {
             } else if (/^\d+ \d+\.\d+$/.test(line)) {
               const [packageId, value] = line.split(' ').map(Number);
               if (value === 1.0) {
-                price = packages.find(pkg => pkg.id === packageId)?.monthly_price_yearly_subscription_in_cents || 0;
+                if (subscriptionPayment == 'yearly') {
+                  packagePrice = packages.find(pkg => pkg.id === packageId)?.monthly_price_yearly_subscription_in_cents || 0;
+                } else if (subscriptionPayment == 'monthly') {
+                  packagePrice = packages.find(pkg => pkg.id === packageId)?.monthly_price_cents || 0;
+                } else {
+                  throw Error
+                }
                 packageName = packages.find(pkg => pkg.id === packageId)?.name || 'Unknown';
-                chosenPackages.push({packageId, packageName, price});
+                chosenPackages.push({packageId, packageName, packagePrice});
               }
             }
           }
-        return chosenPackages;
+        return chosenPackages as chosenPackages[];
     } catch (error) {
         console.error('Failed to fetch:', error);
         return []

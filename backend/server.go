@@ -108,6 +108,7 @@ func main () {
         defer file.Close()
 
         reader := csv.NewReader(file)
+		reader.FieldsPerRecord = -1
         records, err := reader.ReadAll()
         if err != nil {
             c.JSON(http.StatusInternalServerError, gin.H{
@@ -118,14 +119,16 @@ func main () {
         }
 
         var collections []map[string]interface{}
-        for _, record := range records {
-            if len(record) > 0 {
-                collection := map[string]interface{}{
-                    "collectionName": record[0],
-                    "teams":          record[1:],
-                }
-                collections = append(collections, collection)
+        for i, record := range records {
+            if len(record) < 1 {
+                log.Printf("Skipping record on line %d: not enough fields\n", i+1)
+                continue
             }
+            collection := map[string]interface{}{
+                "collectionName": record[0],
+                "teams":          record[1:],
+            }
+            collections = append(collections, collection)
         }
 
         log.Println("Data:", collections)

@@ -4,12 +4,12 @@ import sys
 import json
 import io
 
-#input_data = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8').read()
+input_data = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8').read()
 
-#print("input Data: ", input_data)
-#input_json = json.loads(input_data)
+print("input Data: ", input_data)
+input_json = json.loads(input_data)
 
-#print("input JSON: ", input_json)
+print("input JSON: ", input_json)
 
 # Load the CSV data
 bc_game = pd.read_csv('../public/data/bc_game.csv')
@@ -24,8 +24,17 @@ merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
 merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
 
 # Filter for specific teams
-#teams = input_json['teams']
-teams = ['Bayern München','Borussia Dortmund','Schalke 04','Hamburger SV','SG Dynamo Dresden','1860 München','Real Madrid','Liverpool FC','Paris Saint-Germain','Juventus Turin','Galatasaray SK','Ajax Amsterdam','FC Porto','FK Austria Wien','Al-Nassr FC','Inter Miami CF']
+teams = input_json['teams']
+#teams = ['Bayern München','Borussia Dortmund','Schalke 04','Hamburger SV','SG Dynamo Dresden','1860 München','Real Madrid','Liverpool FC','Paris Saint-Germain','Juventus Turin','Galatasaray SK','Ajax Amsterdam','FC Porto','FK Austria Wien','Al-Nassr FC','Inter Miami CF']
+
+payment = input_json['payment']
+
+if payment == 'monthly':
+    merged_data = merged_data.dropna(subset=['monthly_price_cents'])
+elif payment == 'yearly':
+    print('payment: yearly')
+else:
+    print('No payment selection') 
 
 print(teams)
 #teams = ['Bayern München', 'FC Barcelona']
@@ -44,7 +53,7 @@ def main():
     # Define the decision variables
     package_vars = {}
     for pkg_id in merged_data['streaming_package_id'].unique():
-        package_vars[pkg_id] = solver.IntVar(0.0, infinity, str(pkg_id))
+        package_vars[pkg_id] = solver.IntVar(0, infinity, str(pkg_id))
 
     print("Number of variables =", solver.NumVariables())
     
@@ -56,7 +65,10 @@ def main():
     print("Number of constraints =", solver.NumConstraints())
 
     # Objective Function
-    solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_yearly_subscription_in_cents'].iloc[0] for pkg_id in package_vars]))
+    if payment == 'yearly':
+        solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_yearly_subscription_in_cents'].iloc[0] for pkg_id in package_vars]))
+    elif payment == 'monthly':
+        solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_cents'].iloc[0] for pkg_id in package_vars]))
 
     print(f"Solving with {solver.SolverVersion()}")
     status = solver.Solve()

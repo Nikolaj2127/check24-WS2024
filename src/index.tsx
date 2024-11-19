@@ -9,6 +9,7 @@ import StreamingPackagesPage from './pages/streamingPackages';
 import CalculateBestPackagesPage from './pages/calculateBestPackages';
 import NNTraining from './pages/nNTraining';
 import teamCollections from './pages/teamCollections';
+import Result from './pages/result';
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
           {
             path: '/nNTraining',
             Component: NNTraining,
+          },
+          {
+            path: '/calculate_best_packages/result',
+            Component: Result,
           },
         ],
       },

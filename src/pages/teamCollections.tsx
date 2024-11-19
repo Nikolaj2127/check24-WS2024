@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
-import { List, ListSubheader, ListItemButton, ListItemText, Collapse } from "@mui/material";
+import { List, ListSubheader, ListItemButton, ListItemText, Collapse, ListItem } from "@mui/material";
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Typography } from "@mui/material";
 import { fetchBackendTeamsCollection } from "../components/fetchBackendTeamCollections";
+import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
 
 export default function TeamCollections() {
+    const navigate = useNavigate()
     const [collections, setCollections] = useState<any>([]);
     const [open, setOpen] = useState<{ [key: number]: boolean }>({});
+
+    const handleNavigate = (teams: string[]) => {
+        navigate('/calculate_best_packages/result', {state: {selectedTeams: teams}})
+    }
 
     const handleClick = (index: number) => {
         setOpen(prevOpen => ({ ...prevOpen, [index]: !prevOpen[index] }));
@@ -36,21 +43,31 @@ export default function TeamCollections() {
             }
         >
             {collections.map((collection: any, index: number) => (
-                <div key={index}>
-                    <ListItemButton onClick={() => handleClick(index)}>
+            <div key={index}>
+                <ListItem>
+                    <ListItemButton onClick={() => handleClick(index)} sx={{ flexGrow: 1 }}>
                         <ListItemText primary={collection.collectionName} />
                         {open[index] ? <ExpandLess /> : <ExpandMore />}
                     </ListItemButton>
-                    <Collapse in={open[index]} timeout="auto" unmountOnExit>
-                        <List component="div" disablePadding>
-                            {collection.teams.map((team: string, teamIndex: number) => (
-                                <ListItemButton key={teamIndex} sx={{ pl: 4 }}>
-                                    <ListItemText primary={team} />
-                                </ListItemButton>
-                            ))}
-                        </List>
-                    </Collapse>
-                </div>
+                    <Button
+                        onClick={(e) => {
+                        e.stopPropagation(); // Prevents the collapse from toggling
+                        handleNavigate(collection.teams);
+                        }}
+                    >
+                        View Results
+                    </Button>
+                </ListItem>
+                <Collapse in={open[index]} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                        {collection.teams.map((team: string, teamIndex: number) => (
+                        <ListItemButton key={teamIndex} sx={{ pl: 4 }}>
+                            <ListItemText primary={team} />
+                        </ListItemButton>
+                        ))}
+                    </List>
+                </Collapse>
+            </div>
             ))}
         </List>
         </Typography>
