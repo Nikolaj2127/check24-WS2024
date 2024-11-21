@@ -6,7 +6,7 @@ import { PageContainer } from '@toolpad/core/PageContainer';
 export default function Layout() {
   return (
     <DashboardLayout>
-      <PageContainer>
+      <PageContainer maxWidth={'xl'}>
         <Outlet />
       </PageContainer>
     </DashboardLayout>

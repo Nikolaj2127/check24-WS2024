@@ -1,9 +1,10 @@
 import { fetchData, bc_streaming_package } from "./fetchData";
 
 export interface chosenPackages {
-  packageId: number
+  packageId?: number
   packageName: string
   packagePrice: number
+  loading?: boolean
 }
 
 export async function fetchBackendData (teams: string[], subscriptionPayment: string) {

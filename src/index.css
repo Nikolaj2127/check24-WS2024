@@ -17,3 +17,7 @@ code {
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjust the minmax value as needed */
   gap: 10px; /* Adjust the gap value as needed */
 }
+
+.MuiDataGrid-root .MuiDataGrid-cell:focus-within {
+  outline: none !important;
+}

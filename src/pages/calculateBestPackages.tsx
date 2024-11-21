@@ -7,9 +7,10 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { fetchData } from '../components/fetchData';
 import { useNavigate } from 'react-router-dom';
+import '../index.css'
 
 const columns: GridColDef[] = [
-    { field: 'team', headerName: 'Team', width: 300 }
+    { field: 'team', headerName: 'Team', flex: 1 }
 ];
 
 export default function CalculateBestPackagesPage() {
@@ -69,18 +70,20 @@ export default function CalculateBestPackagesPage() {
         <div>
             <Typography component="div">
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <Box sx={{ width: '80%' }}>
+                    <Box>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <DataGrid
+                                sx={{minWidth: 50}}
                                 rows={rows}
                                 columns={columns}
-                                initialState={{
+                                initialState={{ 
                                     pagination: {
                                         paginationModel: {
                                             pageSize: 10,
                                         },
                                     },
                                 }}
+                                disableColumnResize={true}
                                 pageSizeOptions={[10]}
                                 checkboxSelection
                                 keepNonExistentRowsSelected

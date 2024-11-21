@@ -6,108 +6,106 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import CircularProgress, { CircularProgressProps } from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { Button } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import PackageCard from '../components/result/packageCard';
 import { chosenPackages } from '../components/fetchBackendData';
+import { ShowResult } from '../components/result/showResult';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import { Skeleton } from '@mui/material';
+
 
 export default function Result() {
     const location = useLocation()
     const navigate = useNavigate()
     const selectedPackages = location.state?.selectedTeams
-    const [solverResultsMonthly, setSolverResultsMonthly] = useState<chosenPackages[]>([]);
-    const [solverResultsYearly, setSolverResultsYearly] = useState<chosenPackages[]>([]);
-    const [loading, setLoading] = useState(true)
+    const [isYearly, setIsYearly] = useState(true)
+    const [solverResult, setSolverResult] = useState<chosenPackages[]>([]);
+    const [loading, setLoading] = useState<'yearly' | 'monthly' | null>('yearly');
+    const [firstLoading, setFirstLoading] = useState(true)
+
+    const handleYearlyClick = () => {
+      setIsYearly(true)
+      setLoading('yearly')
+    };
+
+    const handleMonthlyClick = () => {
+      setIsYearly(false)
+      setLoading('monthly')
+    }
 
     useEffect(() => {
         if (selectedPackages.length > 0) {
-          calcPackages();
+          if (isYearly) {
+            calcPackages('yearly');
+          } else {
+            calcPackages('monthly')
+          }
         }
-      }, [selectedPackages]);
+      }, [selectedPackages, isYearly]);
 
-    async function calcPackages() {
-      const resultYearly = await calcPackages_test(selectedPackages, 'yearly') as chosenPackages[]
-      const resultMonthly = await calcPackages_test(selectedPackages, 'monthly') as chosenPackages[]
-
-      setSolverResultsYearly(resultYearly);
-      setSolverResultsMonthly(resultMonthly);
-      
-      setLoading(false);
+    async function calcPackages(subscriptionPayment: string) {
+      const result = await calcPackages_test(selectedPackages, subscriptionPayment) as chosenPackages[]
+      setSolverResult(result);
+      setLoading(null)
+      setFirstLoading(false);
     }
-
-    const totalPriceMonthly = solverResultsMonthly.reduce((sum, result) => sum + result.packagePrice, 0);
-    const totalPriceYearly = solverResultsYearly.reduce((sum, result) => sum + result.packagePrice, 0);
 
   return ( 
     <Typography component="div">
-        {loading? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <CircularProgress />
-            </Box>
-        ) : (
         <div>
-            { solverResultsYearly.length > 0 && (
-                <div>
-                    <Typography variant="h6">Solver Results Yearly:</Typography>
-                    {solverResultsYearly.length > 0 ? (
-                      <div>
-                        <div>
-                        <Grid container spacing={2}>
-                        {solverResultsYearly.map((item, index) => (
-                          <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={index}>
-                            <PackageCard
-                              packageId={item.packageId}
-                              packageName={item.packageName}
-                              packagePrice={item.packagePrice}
-                            />
-                          </Grid>
-                        ))}
-                        </Grid>
-                        </div>
-                      <ul>
-                          {solverResultsYearly.map((resultYearly, index) => (
-                              <li key={index}>
-                                  Package Name: {resultYearly.packageName}, Package ID: {resultYearly.packageId}, Price: {resultYearly.packagePrice / 100 + " €"}
-                              </li>
-                          ))}
-                      </ul>
-                      <Typography variant="h6">Total Price: {totalPriceYearly / 100 + " €"}</Typography>
-                    </div>
-                    ) : (
-                      <div>
-                        <br/>
-                        <div> Games cannot be covered by Streaming packages </div>
-                        <br/>
-                      </div>
-                    )
-                    }
-                    <br/>
-                    <Typography variant="h6">Solver Results Monthly:</Typography>
-                    <div>
-                      {solverResultsMonthly.length > 0 ? (
-                      <div>
-                        <ul>
-                            {solverResultsMonthly.map((resultMonthly, index) => (
-                                <li key={index}>
-                                    Package Name: {resultMonthly.packageName}, Package ID: {resultMonthly.packageId}, Price: {resultMonthly.packagePrice / 100 + " €"}
-                                </li>
-                            ))}
-                        </ul>
-                        <Typography variant="h6">Total Price: {totalPriceMonthly / 100 + " €"}</Typography>
-                      </div>
-                      ) : (
-                        <div>
-                          <br/>
-                          <div> Games cannot be covered by Streaming packages </div>
-                          <br/>
-                        </div>
-                      )
-                      }
-                    </div>
-                </div>
-            )}
+            <Typography variant="h4">
+              Best Package Combination:
+            </Typography>
+            <br/>
+            <Stack direction="row" spacing={1}>
+            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+              <Chip 
+                label="Yearly" 
+                variant="outlined" 
+                onClick={handleYearlyClick} 
+                disabled={loading === 'yearly' || isYearly} 
+              />
+              {loading === 'yearly' && (
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    color: 'primary.main',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    marginTop: '-12px',
+                    marginLeft: '-12px',
+                  }}
+                />
+              )}
+            </Box>
+            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+              <Chip 
+                label="Monthly" 
+                variant="outlined" 
+                onClick={handleMonthlyClick} 
+                disabled={loading === 'monthly' || !isYearly}
+              />
+              {loading === 'monthly' && (
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    color: 'primary.main',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    marginTop: '-12px',
+                    marginLeft: '-12px',
+                  }}
+                />
+              )}
+            </Box>
+          </Stack>
+            <br/>
+            <ShowResult solverResult={solverResult} loading={loading === 'monthly' || loading === 'yearly'}/>
+            <br/>
             <Button variant="contained" onClick={() => navigate('/calculate_best_packages')}>Back</Button>
         </div>
-        )}
+        
     </Typography>
   )
 }
