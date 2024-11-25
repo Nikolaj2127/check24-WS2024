@@ -1,30 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Box, TextField } from '@mui/material';
-import { DataGrid, GridColDef, GridRowId, GridToolbar } from '@mui/x-data-grid';
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import { Typography, Box, Button } from '@mui/material';
+import { DataGrid, GridColDef, GridRowId } from '@mui/x-data-grid';
+import { FixedSizeList } from 'react-window';
+import { PageContainer } from '@toolpad/core';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { fetchData } from '../components/fetchData';
+import { fetchData } from '../components/dataFetching/fetchData';
 import { useNavigate } from 'react-router-dom';
+import CustomToolbar from '../components/customToolbar';
 import '../index.css'
 
-const columns: GridColDef[] = [
+const teamColumns: GridColDef[] = [
     { field: 'team', headerName: 'Team', flex: 1 }
 ];
 
+const compColumns: GridColDef[] = [
+    { field: 'competition', headerName: 'Wettbewerbe', flex: 1 }
+]
+
 export default function CalculateBestPackagesPage() {
     const navigate = useNavigate()
-    const [rows, setRows] = useState<{ id: number, team: string }[]>([]);
+    const [teamRows, setTeamRows] = useState<{ id: number, team: string }[]>([]);
+    const [compRows, setCompRows] = useState<{ id: number, competition: string}[]>([])
     const [selectedRowIds, setSelectedRowIds] = useState<GridRowId[]>([]);
-    const [textFieldValue, setTextFieldValue] = useState('')
-    const [textFieldError, setTextFieldError] = useState(false)
+    const [selectedCompRowIds, setSelectedCompRowIds] = useState<GridRowId[]>([])
+    
 
     useEffect(() => {
         const getData = async () => {
-            const result = await fetchData('teams');
-            const transformedRows = (result as string[]).map((team, index) => ({ id: index, team }));
-            setRows(transformedRows);
+            const teamResult = await fetchData('teams') as string[];
+            const transformedTeamRows = teamResult.map((team, index) => ({ id: index, team }));
+            setTeamRows(transformedTeamRows);
+
+            const compResult = await fetchData('comps') as string[];
+            const transformedCompRows = compResult.map((competition, index) => ({ id: index, competition }));
+            setCompRows(transformedCompRows);
         };
         getData();
     }, []);
@@ -33,122 +44,148 @@ export default function CalculateBestPackagesPage() {
         setSelectedRowIds([...rowSelectionModel]);
     };
 
-    const handleButtonClick = () => {
-        const selectedTeams = selectedRowIds.map(id => rows.find(row => row.id === id)?.team).filter(Boolean) as string[];
-        navigate('/calculate_best_packages/result', { state: { selectedTeams } })
-    };
-
-    const handleSaveTeamsButtonClick = async () => {
-        if (textFieldValue.trim() === '') {
-            setTextFieldError(true);
-            return;
-        }
-        setTextFieldError(false);
-        const selectedTeams = selectedRowIds.map(id => rows.find(row => row.id === id)?.team).filter(Boolean) as string[];
-        console.log("collection Name: ", textFieldValue)
-        try {
-            const response = await fetch('http://localhost:4000/saveTeams', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ collectionName: textFieldValue, teams: selectedTeams }),
-            });
-    
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-    
-            const result = await response.json();
-            console.log('Teams saved successfully:', result);
-        } catch (error) {
-            console.error('Error saving teams:', error);
-        }
+    const handleCompSelectionChange = (compRowSelectionModel: readonly GridRowId[]) => {
+        setSelectedCompRowIds([...compRowSelectionModel])
     }
 
+    const handleButtonClick = () => {
+        const selectedTeams = selectedRowIds.map(id => teamRows.find(row => row.id === id)?.team).filter(Boolean) as string[];
+        navigate('/calculate_best_packages/result', { state: { selectedTeams, selectedRowIds, teamRows } })
+    };
+
     return (
-        <div>
-            <Typography component="div">
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <Box>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <DataGrid
-                                sx={{minWidth: 50}}
-                                rows={rows}
-                                columns={columns}
-                                initialState={{ 
-                                    pagination: {
-                                        paginationModel: {
-                                            pageSize: 10,
+        
+        <div style={{
+            position: 'relative',
+            height: '100vh',
+            width: '100vw'
+        }}>
+            <div style={{
+                position: 'absolute',
+                height: '100%',
+                width: '100vw',
+                backgroundImage: `url('/images/allianz_arena.jpg')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                zIndex: -1
+            }}></div>
+            <PageContainer maxWidth={'xl'} style={{backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px', paddingBottom: 5}}>
+                <Typography component="div">
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <Box>
+                            <div style={{ display: 'flex', flexDirection: 'column', marginRight: 10 }}>
+                                <DataGrid
+                                    sx={{width: 350, backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px'}}
+                                    rows={teamRows}
+                                    columns={teamColumns}
+                                    initialState={{ 
+                                        pagination: {
+                                            paginationModel: {
+                                                pageSize: 10,
+                                            },
                                         },
-                                    },
-                                }}
-                                disableColumnResize={true}
-                                pageSizeOptions={[10]}
-                                checkboxSelection
-                                keepNonExistentRowsSelected
-                                slots={{ toolbar: GridToolbar }}
-                                slotProps={{
-                                toolbar: {
-                                    showQuickFilter: true,
-                                },
-                                }}
-                                onRowSelectionModelChange={(rowSelectionModel) => handleSelectionChange(rowSelectionModel)}
-                            />
-                        </div>
-                    </Box>
-                    <Box
-                    sx={{ width: '20%', maxHeight: 600, maxWidth: 360, bgcolor: 'background.paper' }}
-                    >
-                        <Typography variant="h6" component="div" sx={{ padding: '16px' }}>
-                            Selected Teams:
-                        </Typography>
-                        <FixedSizeList
-                            height={600}
-                            width={360}
-                            itemSize={46}
-                            itemCount={selectedRowIds.length}
-                            overscanCount={5}
+                                    }}
+                                    disableColumnResize={true}
+                                    pageSizeOptions={[10]}
+                                    checkboxSelection
+                                    keepNonExistentRowsSelected
+                                    disableColumnFilter
+                                    disableColumnSelector
+                                    disableDensitySelector
+                                    slots={{ toolbar: CustomToolbar }}
+                                    onRowSelectionModelChange={(rowSelectionModel) => handleSelectionChange(rowSelectionModel)}
+                                />
+                            </div>
+                        </Box>
+                        <Box>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <DataGrid
+                                    sx={{width: 350, backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px'}}
+                                    rows={compRows}
+                                    columns={compColumns}
+                                    initialState={{ 
+                                        pagination: {
+                                            paginationModel: {
+                                                pageSize: 10,
+                                            },
+                                        },
+                                    }}
+                                    disableColumnResize={true}
+                                    pageSizeOptions={[10]}
+                                    checkboxSelection
+                                    keepNonExistentRowsSelected
+                                    slots={{ toolbar: CustomToolbar }}
+                                    onRowSelectionModelChange={(compRowSelectionModel) => handleCompSelectionChange(compRowSelectionModel)}
+                                />
+                            </div>
+                        </Box>
+                        <Box
+                        sx={{ width: '20%', maxHeight: 600, maxWidth: 360 }}
                         >
-                            {({ index, style }) => {
-                                const id = selectedRowIds[index];
-                                const row = rows.find(row => row.id === id);
-                                const teamName = row ? row.team : 'Unknown';
-                                return(
-                                    <div>
-                                        <ListItem style={style} key={id} component="div" disablePadding>
-                                            <ListItemButton>
-                                                <ListItemText primary={teamName} />
-                                            </ListItemButton>
-                                        </ListItem>
-                                    </div>
-                                )
-                            }}
-                        </FixedSizeList>
-                    </Box>
-                </div>
-                <br />
-                <Button type="button" variant="contained" color="primary" onClick={handleButtonClick}>
-                    Select Teams
-                </Button>
-                <br />
-                <br />
-                <h1>Set Collection Name</h1>
-                <br />
-                <TextField
-                    label="Team Name"
-                    value={textFieldValue}
-                    onChange={(e) => setTextFieldValue(e.target.value)}
-                    error={textFieldError}
-                    helperText={textFieldError ? 'This field is required' : ''}
-                />
-                <br />
-                <br />
-                <Button type="button" variant="contained" color="primary" onClick={handleSaveTeamsButtonClick}>
-                    Save Team Selection
-                </Button>
-                
-            </Typography>
+                            <Typography variant="h6" component="div" sx={{ padding: '16px' }}>
+                                Selected Teams:
+                            </Typography>
+                            <FixedSizeList
+                                height={600}
+                                width={360}
+                                itemSize={46}
+                                itemCount={selectedRowIds.length}
+                                overscanCount={5}
+                            >
+                                {({ index, style }) => {
+                                    const id = selectedRowIds[index];
+                                    const row = teamRows.find(row => row.id === id);
+                                    const teamName = row ? row.team : 'Unknown';
+                                    return(
+                                        <div>
+                                            <ListItem style={style} key={id} component="div" disablePadding>
+                                                <ListItemButton>
+                                                    <ListItemText primary={teamName} />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        </div>
+                                    )
+                                }}
+                            </FixedSizeList>
+                        </Box>
+                        <Box
+                        sx={{ width: '20%', maxHeight: 600, maxWidth: 360 }}
+                        >
+                            <Typography variant="h6" component="div" sx={{ padding: '16px' }}>
+                                Selected Competitions:
+                            </Typography>
+                            <FixedSizeList
+                                height={600}
+                                width={360}
+                                itemSize={46}
+                                itemCount={selectedCompRowIds.length}
+                                overscanCount={5}
+                            >
+                                {({ index, style }) => {
+                                    const id = selectedCompRowIds[index];
+                                    const row = compRows.find(row => row.id === id);
+                                    const compName = row ? row.competition : 'Unknown';
+                                    return(
+                                        <div>
+                                            <ListItem style={style} key={id} component="div" disablePadding>
+                                                <ListItemButton>
+                                                    <ListItemText primary={compName} />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        </div>
+                                    )
+                                }}
+                            </FixedSizeList>
+                        </Box>
+                    </div>
+                    <br />
+                    <Button type="button" variant="contained" color="primary" onClick={handleButtonClick}>
+                        Select Teams
+                    </Button>
+                    <br/>
+                </Typography>
+            </PageContainer>
         </div>
+        
     );
 }

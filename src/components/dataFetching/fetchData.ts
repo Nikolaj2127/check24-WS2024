@@ -1,4 +1,3 @@
-import * as path from 'path'
 import Papa from 'papaparse'
 
 export interface bc_game {
@@ -30,10 +29,6 @@ export interface teams {
     starts_at: string;
     tournament_name: string;
 }
-
-  const bc_gameHeaders = ['id', 'team_home', 'team_away', 'starts_at', 'tournament_name'];
-  const bc_streaming_offerHeaders = ['game_id', 'streaming_package_id', 'live,highlights'];
-  const bc_streaming_packageHeaders = ['id', 'name', 'monthly_price_cents', 'monthly_price_yearly_subscription_in_cents'];
   
   const bc_gamePath = '/data/bc_game.csv';
   const bc_streaming_offerPath = '/data/bc_streaming_offer.csv';
@@ -131,6 +126,10 @@ export async function fetchData(filename: string) {
         const gameData = await fetchData('bc_game') as bc_game[]
         const uniqueTeams = Array.from(new Set(gameData.map(team => team.team_away && team.team_home)))
         return uniqueTeams as string[]
+    } else if (filename === 'comps') {
+        const gameData = await fetchData('bc_game') as bc_game[]
+        const uniqueComps = Array.from(new Set(gameData.map(comp => comp.tournament_name)))
+        return uniqueComps as string[]
     } else {
         throw new Error('Invalid filename')
     }

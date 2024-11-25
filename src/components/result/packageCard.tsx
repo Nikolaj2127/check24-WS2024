@@ -9,7 +9,7 @@ import Collapse from '@mui/material/Collapse';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { chosenPackages } from '../fetchBackendData';
+import { chosenPackages } from './fetchBackendData';
 import { Skeleton } from '@mui/material';
 
 interface ExpandMoreProps extends IconButtonProps {
@@ -61,7 +61,7 @@ export default function PackageCard({ packageName, packagePrice, loading }: chos
         />
       )}
       <CardContent>
-        <Typography variant="h4" sx={{ color: 'text.secondary', flexGrow: 1, height: '4.5em' }}>
+        <Typography variant="h5" sx={{ color: 'text.secondary', flexGrow: 1, height: '5.5em' }}>
         {loading ? (
             <Skeleton />
         ) : (

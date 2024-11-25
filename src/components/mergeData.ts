@@ -1,5 +1,5 @@
 import { DateTime } from "danfojs/dist/danfojs-base/shared/types"
-import { fetchData, bc_game, bc_streaming_offer, bc_streaming_package } from './fetchData';
+import { fetchData, bc_game, bc_streaming_offer, bc_streaming_package } from './dataFetching/fetchData';
 
 export interface mergedData {
   game_id: number

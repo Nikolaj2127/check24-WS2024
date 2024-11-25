@@ -22,5 +22,5 @@
   },
   "include": [
     "src"
-  ]
+, ".stuff/aiStuff/neuralNetworkPy.ts", ".stuff/aiStuff/neuralNetworkTrainingTest.ts", ".stuff/aiStuff/nNTraining.tsx"  ]
 }

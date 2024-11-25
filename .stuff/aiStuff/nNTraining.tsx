@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { trainAndSaveModel } from '../components/neuralNetworkTraining';
-import mergeData from '../components/mergeData';
+import mergeData from '../../src/components/mergeData';
 
 interface TrainingBatchInfo {
     epoch: number;

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { AppProvider } from '@toolpad/core/react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { DashboardLayout, type Navigation } from '@toolpad/core';

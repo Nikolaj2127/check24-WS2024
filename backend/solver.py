@@ -29,6 +29,9 @@ teams = input_json['teams']
 
 payment = input_json['payment']
 
+isLive = input_json['isLive']
+isHighlights = input_json['isHighlights']
+
 if payment == 'monthly':
     merged_data = merged_data.dropna(subset=['monthly_price_cents'])
 elif payment == 'yearly':
@@ -41,7 +44,11 @@ print(teams)
 merged_data = merged_data[merged_data['team_home'].isin(teams) | merged_data['team_away'].isin(teams)]
 
 # Filter for live games only
-merged_data = merged_data[merged_data['live'] == 1]
+if(isLive):
+    merged_data = merged_data[merged_data['live'] == 1]
+
+if(isHighlights):
+    merged_data = merged_data[merged_data['highlights'] == 1]
 
 def main():
     # Create the mip solver with the CP-SAT backend.

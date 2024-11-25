@@ -1,4 +1,4 @@
-import { fetchData, bc_streaming_package } from "./fetchData";
+import { fetchData, bc_streaming_package, bc_game, bc_streaming_offer } from "../dataFetching/fetchData";
 
 export interface chosenPackages {
   packageId?: number
@@ -7,8 +7,11 @@ export interface chosenPackages {
   loading?: boolean
 }
 
-export async function fetchBackendData (teams: string[], subscriptionPayment: string) {
+export async function fetchBackendData (teams: string[], subscriptionPayment: string, isLive: boolean, isHighlights: boolean) {
     const packages = await fetchData('bc_streaming_package') as bc_streaming_package[]
+    const games = await fetchData('bc_game') as bc_game[]
+    const offers = await fetchData('bc_streaming_offer') as bc_streaming_offer[]
+
     let numVariables = 0;
     let numConstraints = 0;
     let solverInfo = '';
@@ -17,13 +20,31 @@ export async function fetchBackendData (teams: string[], subscriptionPayment: st
     let packageName: string
     let packagePrice: number
 
+    // Merge datasets
+    let mergedData = offers.map(offer => {
+      const game = games.find(game => game.id === offer.game_id);
+      return { ...game, ...offer };
+    }).filter(row => row !== null) as any[];
+
+    // Filter for live games only
+    if (isLive) {
+      mergedData = mergedData.filter(row => row.live === 1);
+    }
+
+    // Filter for highlights only
+    if (isHighlights) {
+      mergedData = mergedData.filter(row => row.highlights === 1);
+    }
+
     try {
         const response = await fetch('http://localhost:4000/solve', {
             mode: 'cors', 
             method: 'POST',
             body: JSON.stringify({
                 teams: teams,
-                payment: subscriptionPayment
+                payment: subscriptionPayment,
+                isLive: isLive,
+                isHighlights: isHighlights
             }),
             headers: {
                 "Content-Type": "application/json"
@@ -37,6 +58,7 @@ export async function fetchBackendData (teams: string[], subscriptionPayment: st
         const data = await response.json();
         const lines = data.res.split('\r\n');
         console.log(lines)
+        
         for (const line of lines) {
             if (line.startsWith('Number of variables =')) {
               numVariables = parseInt(line.split('=')[1].trim());
@@ -60,10 +82,10 @@ export async function fetchBackendData (teams: string[], subscriptionPayment: st
                 chosenPackages.push({packageId, packageName, packagePrice});
               }
             }
-          }
-        return chosenPackages as chosenPackages[];
+          } 
     } catch (error) {
         console.error('Failed to fetch:', error);
-        return []
+        chosenPackages = []
     }
+    return {chosenPackages: chosenPackages, mergedData: mergedData}
 };

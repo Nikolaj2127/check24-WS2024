@@ -3,9 +3,10 @@ import { List, ListSubheader, ListItemButton, ListItemText, Collapse, ListItem }
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Typography } from "@mui/material";
-import { fetchBackendTeamsCollection } from "../components/fetchBackendTeamCollections";
+import { fetchBackendTeamsCollection } from "../components/dataFetching/fetchBackendTeamCollections";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
+import { PageContainer } from "@toolpad/core";
 
 export default function TeamCollections() {
     const navigate = useNavigate()
@@ -32,44 +33,45 @@ export default function TeamCollections() {
 
     return (
         <Typography component="div">
-            <List
-            sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
-            component="nav"
-            aria-labelledby="nested-list-subheader"
-            subheader={
-                <ListSubheader component="div" id="nested-list-subheader">
-                    Team Collections
-                </ListSubheader>
-            }
-        >
-            {collections.map((collection: any, index: number) => (
-            <div key={index}>
-                <ListItem>
-                    <ListItemButton onClick={() => handleClick(index)} sx={{ flexGrow: 1 }}>
-                        <ListItemText primary={collection.collectionName} />
-                        {open[index] ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>
-                    <Button
-                        onClick={(e) => {
-                        e.stopPropagation(); // Prevents the collapse from toggling
-                        handleNavigate(collection.teams);
-                        }}
-                    >
-                        View Results
-                    </Button>
-                </ListItem>
-                <Collapse in={open[index]} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                        {collection.teams.map((team: string, teamIndex: number) => (
-                        <ListItemButton key={teamIndex} sx={{ pl: 4 }}>
-                            <ListItemText primary={team} />
+            <PageContainer maxWidth={'xl'} style={{backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px', paddingBottom: 5}}>
+                <List
+                sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+                component="nav"
+                aria-labelledby="nested-list-subheader"
+                subheader={
+                    <ListSubheader component="div" id="nested-list-subheader">
+                        Team Collections
+                    </ListSubheader>
+                }>
+                {collections.map((collection: any, index: number) => (
+                <div key={index}>
+                    <ListItem>
+                        <ListItemButton onClick={() => handleClick(index)} sx={{ flexGrow: 1 }}>
+                            <ListItemText primary={collection.collectionName} />
+                            {open[index] ? <ExpandLess /> : <ExpandMore />}
                         </ListItemButton>
-                        ))}
-                    </List>
-                </Collapse>
-            </div>
-            ))}
-        </List>
+                        <Button
+                            onClick={(e) => {
+                            e.stopPropagation(); // Prevents the collapse from toggling
+                            handleNavigate(collection.teams);
+                            }}
+                        >
+                            View Results
+                        </Button>
+                    </ListItem>
+                    <Collapse in={open[index]} timeout="auto" unmountOnExit>
+                        <List component="div" disablePadding>
+                            {collection.teams.map((team: string, teamIndex: number) => (
+                            <ListItemButton key={teamIndex} sx={{ pl: 4 }}>
+                                <ListItemText primary={team} />
+                            </ListItemButton>
+                            ))}
+                        </List>
+                    </Collapse>
+                </div>
+                ))}
+                </List>
+            </PageContainer>
         </Typography>
     );
 }

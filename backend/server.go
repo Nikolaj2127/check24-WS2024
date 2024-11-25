@@ -28,7 +28,7 @@ func main () {
 			return
 		}
 	
-		cmd := exec.Command("python", "./solverTime.py")
+		cmd := exec.Command("python", "./solver.py")
 		stdin, err := cmd.StdinPipe()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{

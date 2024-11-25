@@ -2,14 +2,15 @@ import { Skeleton, Typography } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import PackageCard from './packageCard';
 import ResultFiltering from './resultFiltering';
-import { chosenPackages } from "../fetchBackendData";
+import { chosenPackages } from "./fetchBackendData"
 
 interface ShowResultProps {
     solverResult: chosenPackages[];
     loading: boolean;
+    games: any
 }
 
-export const ShowResult: React.FC<ShowResultProps> = ({ solverResult, loading }) => {
+export const ShowResult: React.FC<ShowResultProps> = ({ solverResult, loading, games }) => {
     const totalPrice = solverResult.reduce((sum, result) => sum + result.packagePrice, 0);
 
     return (

@@ -1,5 +1,5 @@
 import mergeData from './mergeData';
-import { fetchBackendData } from './fetchBackendData';
+import { fetchBackendData } from './result/fetchBackendData';
 
 export async function calcPackages_test(teams: string[], subscriptionPayment: string) {
   let mergedData = await mergeData()
@@ -10,6 +10,6 @@ export async function calcPackages_test(teams: string[], subscriptionPayment: st
 
   //return await tree(mergedData, subscriptionPayment)
   //return await lpSolver(mergedData as mergedData[], subscriptionPayment);
-  return await fetchBackendData(teams, subscriptionPayment)
+  return await fetchBackendData(teams, subscriptionPayment, false, false)
 }
   
