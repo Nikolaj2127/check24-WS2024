@@ -130,6 +130,49 @@ export async function fetchData(filename: string) {
         const gameData = await fetchData('bc_game') as bc_game[]
         const uniqueComps = Array.from(new Set(gameData.map(comp => comp.tournament_name)))
         return uniqueComps as string[]
+    } else if (filename === 'comps_teams') {
+        const gameData = await fetchData('bc_game') as bc_game[];
+
+        // Create a map of teams to competitions
+        const teamsMap = new Map<string, { id: number, teamName: string, compNames: Set<string> }>();
+        const compsMap = new Map<string, { id: number, competition: string, teamNames: Set<string> }>();
+
+        for (const game of gameData) {
+            const gameId = game.id
+            const competitionName = game.tournament_name;
+            const teamHomeName = game.team_home;
+            const teamAwayName = game.team_away;
+
+            if (!teamsMap.has(teamHomeName)) {
+                teamsMap.set(teamHomeName, { id: gameId , teamName: teamHomeName, compNames: new Set() });
+            }
+            if (!teamsMap.has(teamAwayName)) {
+                teamsMap.set(teamAwayName, { id: gameId, teamName: teamAwayName, compNames: new Set() });
+            }
+            if (!compsMap.has(competitionName)) {
+                compsMap.set(competitionName, { id: gameId, competition: competitionName, teamNames: new Set() });
+            }
+
+            teamsMap.get(teamHomeName)!.compNames.add(competitionName);
+            teamsMap.get(teamAwayName)!.compNames.add(competitionName);
+            compsMap.get(competitionName)!.teamNames.add(teamHomeName);
+            compsMap.get(competitionName)!.teamNames.add(teamAwayName);
+        }
+
+        // Convert the maps to arrays of objects
+        const teams = Array.from(teamsMap.entries()).map(([teamName, { id, compNames }]) => ({
+            id,
+            teamName,
+            compNames: Array.from(compNames),
+        }));
+
+        const comps = Array.from(compsMap.entries()).map(([competition, { id, teamNames }]) => ({
+            id,
+            competition,
+            teamNames: Array.from(teamNames),
+        }));
+
+        return [{ teams: teams, comps: comps }];
     } else {
         throw new Error('Invalid filename')
     }

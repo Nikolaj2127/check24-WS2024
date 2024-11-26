@@ -1,7 +1,7 @@
 import mergeData from './mergeData';
 import { fetchBackendData } from './result/fetchBackendData';
 
-export async function calcPackages_test(teams: string[], subscriptionPayment: string) {
+export async function calcPackages_test(teams: string[], comps: string[], subscriptionPayment: string) {
   let mergedData = await mergeData()
 
   // Filter out packages not available for monthly payment
@@ -10,6 +10,6 @@ export async function calcPackages_test(teams: string[], subscriptionPayment: st
 
   //return await tree(mergedData, subscriptionPayment)
   //return await lpSolver(mergedData as mergedData[], subscriptionPayment);
-  return await fetchBackendData(teams, subscriptionPayment, false, false)
+  return await fetchBackendData(teams, comps, subscriptionPayment, false, false)
 }
   

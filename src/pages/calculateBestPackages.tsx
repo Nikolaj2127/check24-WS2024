@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Box, Button } from '@mui/material';
-import { DataGrid, GridColDef, GridRowId } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, gridClasses } from '@mui/x-data-grid';
 import { FixedSizeList } from 'react-window';
 import { PageContainer } from '@toolpad/core';
 import ListItem from '@mui/material/ListItem';
@@ -12,49 +12,121 @@ import CustomToolbar from '../components/customToolbar';
 import '../index.css'
 
 const teamColumns: GridColDef[] = [
-    { field: 'team', headerName: 'Team', flex: 1 }
+    { field: 'teamName', headerName: 'Team', flex: 1, headerClassName: 'header-right' }
 ];
 
 const compColumns: GridColDef[] = [
-    { field: 'competition', headerName: 'Wettbewerbe', flex: 1 }
+    { field: 'competition', headerName: 'Wettbewerbe', flex: 1, headerClassName: 'header-right' }
 ]
+
+interface TeamType {
+    id: number;
+    gameId: number;
+    teamName: string;
+    compNames: string[];
+}
+  
+interface CompType {
+    id: number;
+    gameId: number;
+    competition: string;
+    teamNames: string[];
+}
+
+interface TeamCompType {
+    teams: TeamType[];
+    comps: CompType[];
+}
 
 export default function CalculateBestPackagesPage() {
     const navigate = useNavigate()
-    const [teamRows, setTeamRows] = useState<{ id: number, team: string }[]>([]);
-    const [compRows, setCompRows] = useState<{ id: number, competition: string}[]>([])
+    const [teamRows, setTeamRows] = useState<TeamType[]>([]);
+    const [compRows, setCompRows] = useState<CompType[]>([])
     const [selectedRowIds, setSelectedRowIds] = useState<GridRowId[]>([]);
     const [selectedCompRowIds, setSelectedCompRowIds] = useState<GridRowId[]>([])
+    const [selectedTeams, setSelectedTeams] = useState<GridRowId[]>([]);
+    const [selectedComps, setSelectedComps] = useState<GridRowId[]>([]);
+    const [filteredComps, setFilteredComps] = useState<any[]>(compRows);
+    const [filteredTeams, setFilteredTeams] = useState<any[]>(teamRows);
     
 
     useEffect(() => {
         const getData = async () => {
-            const teamResult = await fetchData('teams') as string[];
-            const transformedTeamRows = teamResult.map((team, index) => ({ id: index, team }));
+            const [{ teams, comps }] = await fetchData('comps_teams') as TeamCompType[];
+            const transformedTeamRows = teams.map((team, index) => ({
+                id: index,
+                gameId: team.id,
+                teamName: team.teamName,
+                compNames: team.compNames,
+            }));
+            const transformedCompRows = comps.map((comp, index) => ({
+                id: index,
+                gameId: comp.id,
+                competition: comp.competition,
+                teamNames: comp.teamNames,
+            }));
             setTeamRows(transformedTeamRows);
-
-            const compResult = await fetchData('comps') as string[];
-            const transformedCompRows = compResult.map((competition, index) => ({ id: index, competition }));
+            setFilteredTeams(transformedTeamRows);
             setCompRows(transformedCompRows);
+            setFilteredComps(transformedCompRows);
+            console.log(transformedTeamRows)
         };
         getData();
     }, []);
 
-    const handleSelectionChange = (rowSelectionModel: readonly GridRowId[]) => {
-        setSelectedRowIds([...rowSelectionModel]);
+    const handleTeamSelectionChange = (selectionModel: readonly GridRowId[]) => {
+        setSelectedRowIds([...selectionModel]);
+    
+        if (selectionModel.length === 0) {
+            // No teams selected, show all competitions
+            setFilteredComps(compRows);
+        } else {
+            // Collect all competition names from selected teams
+            const selectedTeamCompNames = new Set<string>();
+            teamRows.forEach((team) => {
+                if (selectionModel.includes(team.id)) {
+                    team.compNames.forEach((compName) => selectedTeamCompNames.add(compName));
+                }
+            });
+    
+            // Filter competitions based on collected competition names
+            const newFilteredComps = compRows.filter((comp) =>
+                selectedTeamCompNames.has(comp.competition)
+            );
+            setFilteredComps(newFilteredComps);
+        }
     };
 
-    const handleCompSelectionChange = (compRowSelectionModel: readonly GridRowId[]) => {
-        setSelectedCompRowIds([...compRowSelectionModel])
-    }
+    const handleCompSelectionChange = (selectionModel: readonly GridRowId[]) => {
+        setSelectedCompRowIds([...selectionModel]);
+    
+        if (selectionModel.length === 0) {
+            // No competitions selected, show all teams
+            setFilteredTeams(teamRows);
+        } else {
+            // Collect all team names from selected competitions
+            const selectedCompTeamNames = new Set<string>();
+            compRows.forEach((comp) => {
+                if (selectionModel.includes(comp.id)) {
+                    comp.teamNames.forEach((teamName) => selectedCompTeamNames.add(teamName));
+                }
+            });
+    
+            // Filter teams based on collected team names
+            const newFilteredTeams = teamRows.filter((team) =>
+                selectedCompTeamNames.has(team.teamName)
+            );
+            setFilteredTeams(newFilteredTeams);
+        }
+    };
 
     const handleButtonClick = () => {
-        const selectedTeams = selectedRowIds.map(id => teamRows.find(row => row.id === id)?.team).filter(Boolean) as string[];
-        navigate('/calculate_best_packages/result', { state: { selectedTeams, selectedRowIds, teamRows } })
+        const selectedTeams = selectedRowIds.map(id => teamRows.find(row => row.id === id)?.teamName).filter(Boolean) as string[];
+        const selectedComps = selectedCompRowIds.map(id => compRows.find(row => row.id === id)?.competition).filter(Boolean) as string[];
+        navigate('/calculate_best_packages/result', { state: { selectedTeams, selectedComps, selectedRowIds, teamRows } })
     };
 
     return (
-        
         <div style={{
             position: 'relative',
             height: '100vh',
@@ -69,16 +141,30 @@ export default function CalculateBestPackagesPage() {
                 backgroundPosition: 'center',
                 zIndex: -1
             }}></div>
-            <PageContainer maxWidth={'xl'} style={{backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px', paddingBottom: 5}}>
+            <PageContainer style={{backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px', paddingBottom: 5}}>
                 <Typography component="div">
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <Box>
-                            <div style={{ display: 'flex', flexDirection: 'column', marginRight: 10 }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', height: '671.5px'}}>
+                            <div style={{ marginRight: 10 }}>
                                 <DataGrid
-                                    sx={{width: 350, backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px'}}
-                                    rows={teamRows}
+                                    sx={{
+                                        width: 350,
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        borderRadius: '15px',
+                                        '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
+                                            backgroundColor: 'rgb(6, 55, 115)',
+                                        },
+                                        '& .MuiDataGrid-columnsContainer, .MuiDataGrid-cell': {
+                                            backgroundColor: 'transparent',
+                                        },
+                                        '& .header-right': {
+                                            [`& .${gridClasses.columnSeparator}`]: {
+                                                display: 'none',
+                                            },
+                                        },
+                                    }}
+                                    rows={filteredTeams}
                                     columns={teamColumns}
-                                    initialState={{ 
+                                    initialState={{
                                         pagination: {
                                             paginationModel: {
                                                 pageSize: 10,
@@ -93,17 +179,30 @@ export default function CalculateBestPackagesPage() {
                                     disableColumnSelector
                                     disableDensitySelector
                                     slots={{ toolbar: CustomToolbar }}
-                                    onRowSelectionModelChange={(rowSelectionModel) => handleSelectionChange(rowSelectionModel)}
+                                    onRowSelectionModelChange={handleTeamSelectionChange}
                                 />
                             </div>
-                        </Box>
-                        <Box>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div>
                                 <DataGrid
-                                    sx={{width: 350, backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px'}}
-                                    rows={compRows}
+                                    sx={{
+                                        width: 350,
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        borderRadius: '15px',
+                                        '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
+                                            backgroundColor: 'rgb(6, 55, 115)',
+                                        },
+                                        '& .MuiDataGrid-columnsContainer, .MuiDataGrid-cell': {
+                                            backgroundColor: 'transparent',
+                                        },
+                                        '& .header-right': {
+                                            [`& .${gridClasses.columnSeparator}`]: {
+                                                display: 'none',
+                                            },
+                                        },
+                                    }}
+                                    rows={filteredComps}
                                     columns={compColumns}
-                                    initialState={{ 
+                                    initialState={{
                                         pagination: {
                                             paginationModel: {
                                                 pageSize: 10,
@@ -115,12 +214,11 @@ export default function CalculateBestPackagesPage() {
                                     checkboxSelection
                                     keepNonExistentRowsSelected
                                     slots={{ toolbar: CustomToolbar }}
-                                    onRowSelectionModelChange={(compRowSelectionModel) => handleCompSelectionChange(compRowSelectionModel)}
+                                    onRowSelectionModelChange={handleCompSelectionChange}
                                 />
                             </div>
-                        </Box>
                         <Box
-                        sx={{ width: '20%', maxHeight: 600, maxWidth: 360 }}
+                        sx={{ width: '20%', maxHeight: 600, maxWidth: 350 }}
                         >
                             <Typography variant="h6" component="div" sx={{ padding: '16px' }}>
                                 Selected Teams:
@@ -135,7 +233,7 @@ export default function CalculateBestPackagesPage() {
                                 {({ index, style }) => {
                                     const id = selectedRowIds[index];
                                     const row = teamRows.find(row => row.id === id);
-                                    const teamName = row ? row.team : 'Unknown';
+                                    const teamName = row ? row.teamName : 'Unknown';
                                     return(
                                         <div>
                                             <ListItem style={style} key={id} component="div" disablePadding>
@@ -149,7 +247,7 @@ export default function CalculateBestPackagesPage() {
                             </FixedSizeList>
                         </Box>
                         <Box
-                        sx={{ width: '20%', maxHeight: 600, maxWidth: 360 }}
+                        sx={{ width: '20%', maxHeight: 600, maxWidth: 350 }}
                         >
                             <Typography variant="h6" component="div" sx={{ padding: '16px' }}>
                                 Selected Competitions:
@@ -186,6 +284,5 @@ export default function CalculateBestPackagesPage() {
                 </Typography>
             </PageContainer>
         </div>
-        
     );
 }

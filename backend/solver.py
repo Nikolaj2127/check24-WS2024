@@ -11,6 +11,13 @@ input_json = json.loads(input_data)
 
 print("input JSON: ", input_json)
 
+# Get input data
+payment = input_json['payment']
+isLive = input_json['isLive']
+isHighlights = input_json['isHighlights']
+teams = input_json['teams']
+comps = input_json['comps']
+
 # Load the CSV data
 bc_game = pd.read_csv('../public/data/bc_game.csv')
 bc_streaming_offer = pd.read_csv('../public/data/bc_streaming_offer.csv')
@@ -23,14 +30,7 @@ bc_game.rename(columns={'id': 'game_id'}, inplace=True)
 merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
 merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
 
-# Filter for specific teams
-teams = input_json['teams']
-#teams = ['Bayern München','Borussia Dortmund','Schalke 04','Hamburger SV','SG Dynamo Dresden','1860 München','Real Madrid','Liverpool FC','Paris Saint-Germain','Juventus Turin','Galatasaray SK','Ajax Amsterdam','FC Porto','FK Austria Wien','Al-Nassr FC','Inter Miami CF']
 
-payment = input_json['payment']
-
-isLive = input_json['isLive']
-isHighlights = input_json['isHighlights']
 
 if payment == 'monthly':
     merged_data = merged_data.dropna(subset=['monthly_price_cents'])
@@ -39,9 +39,14 @@ elif payment == 'yearly':
 else:
     print('No payment selection') 
 
-print(teams)
+# Filter for specific teams
+#teams = ['Bayern München','Borussia Dortmund','Schalke 04','Hamburger SV','SG Dynamo Dresden','1860 München','Real Madrid','Liverpool FC','Paris Saint-Germain','Juventus Turin','Galatasaray SK','Ajax Amsterdam','FC Porto','FK Austria Wien','Al-Nassr FC','Inter Miami CF']
 #teams = ['Bayern München', 'FC Barcelona']
 merged_data = merged_data[merged_data['team_home'].isin(teams) | merged_data['team_away'].isin(teams)]
+
+# Filter out specific competitions
+if comps:
+    merged_data = merged_data[merged_data['tournament_name'].isin(comps)]
 
 # Filter for live games only
 if(isLive):
@@ -49,6 +54,8 @@ if(isLive):
 
 if(isHighlights):
     merged_data = merged_data[merged_data['highlights'] == 1]
+
+print(merged_data['tournament_name'])
 
 def main():
     # Create the mip solver with the CP-SAT backend.

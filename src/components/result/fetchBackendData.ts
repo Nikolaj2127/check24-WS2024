@@ -7,7 +7,7 @@ export interface chosenPackages {
   loading?: boolean
 }
 
-export async function fetchBackendData (teams: string[], subscriptionPayment: string, isLive: boolean, isHighlights: boolean) {
+export async function fetchBackendData (teams: string[], comps: string[], subscriptionPayment: string, isLive: boolean, isHighlights: boolean) {
     const packages = await fetchData('bc_streaming_package') as bc_streaming_package[]
     const games = await fetchData('bc_game') as bc_game[]
     const offers = await fetchData('bc_streaming_offer') as bc_streaming_offer[]
@@ -42,6 +42,7 @@ export async function fetchBackendData (teams: string[], subscriptionPayment: st
             method: 'POST',
             body: JSON.stringify({
                 teams: teams,
+                comps: comps,
                 payment: subscriptionPayment,
                 isLive: isLive,
                 isHighlights: isHighlights

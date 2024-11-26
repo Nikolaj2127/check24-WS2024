@@ -13,8 +13,9 @@ export default function Result() {
     const navigate = useNavigate()
     const [textFieldValue, setTextFieldValue] = useState('')
     const [textFieldError, setTextFieldError] = useState(false)
-    const selectedPackages = location.state?.selectedTeams
-    const selectedRowIds = location.state?.selectedRosIds as GridRowId[]
+    const selectedTeams = location.state?.selectedTeams
+    const selectedComps= location.state?.selectedComps
+    const selectedRowIds = location.state?.selectedRowIds as GridRowId[]
     const teamRows = location.state?.teamRows as { id: number, team: string }[]
     const [isYearly, setIsYearly] = useState(true)
     const [isLive, setIsLive] = useState(true)
@@ -63,17 +64,17 @@ export default function Result() {
     }
 
     useEffect(() => {
-        if (selectedPackages.length > 0) {
+        if (selectedTeams.length > 0) {
           if (isYearly) {
             calcPackages('yearly', isLive, isHighlights)
           } else {
             calcPackages('monthly', isLive, isHighlights)
           }
         }
-      }, [selectedPackages, isYearly, isLive, isHighlights]);
+      }, [selectedTeams, isYearly, isLive, isHighlights]);
 
     async function calcPackages(subscriptionPayment: string, isLive: boolean, isHighlights: boolean) {
-      const result = await fetchBackendData(selectedPackages, subscriptionPayment, isLive, isHighlights)
+      const result = await fetchBackendData(selectedTeams, selectedComps ,subscriptionPayment, isLive, isHighlights)
       setSolverResult(result.chosenPackages)
       setSolverResultGames(result.mergedData)
       setLoading(null)

@@ -9,6 +9,7 @@ import StreamingPackagesPage from './pages/streamingPackages';
 import CalculateBestPackagesPage from './pages/calculateBestPackages';
 import teamCollections from './pages/teamCollections';
 import Result from './pages/result';
+import Test from './pages/test';
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
             path: '/calculate_best_packages/result',
             Component: Result,
           },
+          {
+            path: '/test',
+            Component: Test,
+          }
         ],
       },
     ],
