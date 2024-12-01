@@ -15,7 +15,7 @@ export async function fetchBackendData (teams: string[], comps: string[], subscr
     let numVariables = 0;
     let numConstraints = 0;
     let solverInfo = '';
-    let objectiveValue = 0;
+    let objectiveValue: number = 0;
     let chosenPackages: { packageId: number, packageName: string, packagePrice: number }[] = [];
     let packageName: string
     let packagePrice: number
@@ -37,6 +37,7 @@ export async function fetchBackendData (teams: string[], comps: string[], subscr
     }
 
     try {
+        console.time('Fetching Time')
         const response = await fetch('http://localhost:4000/solve', {
             mode: 'cors', 
             method: 'POST',
@@ -52,12 +53,36 @@ export async function fetchBackendData (teams: string[], comps: string[], subscr
             }
         })
         
+        console.timeEnd('Fetching Time')
+        console.log(response)
         
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        const lines = data.res.split('\r\n');
+
+        console.log(data)
+
+        const selectedPackages = data.selected_packages;
+        objectiveValue = data.objective_value;
+        console.log('Selected packages:', selectedPackages);
+
+        selectedPackages.forEach((packageId: number) => {
+            const packageName = packages.find(pkg => pkg.id === packageId)?.name || 'Unknown';
+            let packagePrice = 0;
+            if (subscriptionPayment === 'yearly') {
+                packagePrice = packages.find(pkg => pkg.id === packageId)?.monthly_price_yearly_subscription_in_cents || 0;
+            } else if (subscriptionPayment === 'monthly') {
+                packagePrice = packages.find(pkg => pkg.id === packageId)?.monthly_price_cents || 0;
+            }
+            chosenPackages.push({ packageId, packageName, packagePrice });
+        });
+
+        console.log('Chosen packages:', chosenPackages);
+
+        /* const lines = data.res.split('\r\n');
+
+
         console.log(lines)
         
         for (const line of lines) {
@@ -72,9 +97,9 @@ export async function fetchBackendData (teams: string[], comps: string[], subscr
             } else if (/^\d+ \d+\.\d+$/.test(line)) {
               const [packageId, value] = line.split(' ').map(Number);
               if (value === 1.0) {
-                if (subscriptionPayment == 'yearly') {
+                if (subscriptionPayment === 'yearly') {
                   packagePrice = packages.find(pkg => pkg.id === packageId)?.monthly_price_yearly_subscription_in_cents || 0;
-                } else if (subscriptionPayment == 'monthly') {
+                } else if (subscriptionPayment === 'monthly') {
                   packagePrice = packages.find(pkg => pkg.id === packageId)?.monthly_price_cents || 0;
                 } else {
                   throw Error
@@ -83,10 +108,12 @@ export async function fetchBackendData (teams: string[], comps: string[], subscr
                 chosenPackages.push({packageId, packageName, packagePrice});
               }
             }
-          } 
+          }  */
+         
     } catch (error) {
         console.error('Failed to fetch:', error);
         chosenPackages = []
     }
-    return {chosenPackages: chosenPackages, mergedData: mergedData}
+    
+    return {chosenPackages: chosenPackages, objectiveValue: objectiveValue, mergedData: mergedData}
 };

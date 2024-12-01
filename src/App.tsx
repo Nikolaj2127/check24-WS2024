@@ -4,6 +4,7 @@ import { AppProvider } from '@toolpad/core/react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { DashboardLayout, type Navigation } from '@toolpad/core';
 import { createTheme } from '@mui/material/styles';
+import './index.css';
 
 const NAVIGATION: Navigation = [
   {
@@ -44,11 +45,26 @@ const BRANDING = {
   title: 'Check 24 GenDev Challenge',
 };
 
-const demoTheme = createTheme({
-  cssVariables: {
-    colorSchemeSelector: 'data-toolpad-color-scheme',
+const dashboardTheme = createTheme({
+  colorSchemes: {
+    light: {
+      palette: {
+        background: {
+          default: '#9ab9e0',
+          paper: '#87accf',
+        },
+      },
+    },
+    dark: {
+      palette: {
+        background: {
+          default: '#283e5c',
+          paper: 'var(--primary)',
+        },
+        
+      },
+    },
   },
-  colorSchemes: { light: true, dark: true },
   breakpoints: {
     values: {
       xs: 0,
@@ -62,8 +78,8 @@ const demoTheme = createTheme({
 
 export default function App() {
   return (
-    <AppProvider navigation={NAVIGATION} branding={BRANDING} theme={demoTheme}>
-        <Outlet />
+    <AppProvider navigation={NAVIGATION} branding={BRANDING} theme={dashboardTheme}>
+      <Outlet />
     </AppProvider>
   );
 }

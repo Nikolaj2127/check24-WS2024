@@ -4,62 +4,68 @@ import sys
 import json
 import io
 
-input_data = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8').read()
+""" input_data = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8').read()
 
 print("input Data: ", input_data)
 input_json = json.loads(input_data)
 
-print("input JSON: ", input_json)
+print("input JSON: ", input_json) """
 
-# Get input data
-payment = input_json['payment']
-isLive = input_json['isLive']
-isHighlights = input_json['isHighlights']
-teams = input_json['teams']
-comps = input_json['comps']
+def solver_function(input_json):
 
-# Load the CSV data
-bc_game = pd.read_csv('../public/data/bc_game.csv')
-bc_streaming_offer = pd.read_csv('../public/data/bc_streaming_offer.csv')
-bc_streaming_package = pd.read_csv('../public/data/bc_streaming_package.csv')
+    # Get input data
+    payment = input_json['payment']
+    isLive = input_json['isLive']
+    isHighlights = input_json['isHighlights']
+    teams = input_json['teams']
+    comps = input_json['comps']
 
-# Rename 'id' column to 'game_id' in bc_game
-bc_game.rename(columns={'id': 'game_id'}, inplace=True)
+    # Load the CSV data
+    bc_game = pd.read_csv('../public/data/bc_game.csv')
+    bc_streaming_offer = pd.read_csv('../public/data/bc_streaming_offer.csv')
+    bc_streaming_package = pd.read_csv('../public/data/bc_streaming_package.csv')
 
-# Merge datasets
-merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
-merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
+    # Rename 'id' column to 'game_id' in bc_game
+    bc_game.rename(columns={'id': 'game_id'}, inplace=True)
+
+    # Merge datasets
+    merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
+    merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
 
 
 
-if payment == 'monthly':
-    merged_data = merged_data.dropna(subset=['monthly_price_cents'])
-elif payment == 'yearly':
-    print('payment: yearly')
-else:
-    print('No payment selection') 
+    if payment == 'monthly':
+        merged_data = merged_data.dropna(subset=['monthly_price_cents'])
+    elif payment == 'yearly':
+        print('payment: yearly')
+    else:
+        print('No payment selection') 
 
-# Filter for specific teams
-#teams = ['Bayern München','Borussia Dortmund','Schalke 04','Hamburger SV','SG Dynamo Dresden','1860 München','Real Madrid','Liverpool FC','Paris Saint-Germain','Juventus Turin','Galatasaray SK','Ajax Amsterdam','FC Porto','FK Austria Wien','Al-Nassr FC','Inter Miami CF']
-#teams = ['Bayern München', 'FC Barcelona']
-merged_data = merged_data[merged_data['team_home'].isin(teams) | merged_data['team_away'].isin(teams)]
+    # Filter for specific teams
+    if teams:
+        #teams = ['Bayern München','Borussia Dortmund','Schalke 04','Hamburger SV','SG Dynamo Dresden','1860 München','Real Madrid','Liverpool FC','Paris Saint-Germain','Juventus Turin','Galatasaray SK','Ajax Amsterdam','FC Porto','FK Austria Wien','Al-Nassr FC','Inter Miami CF']
+        #teams = ['Bayern München', 'FC Barcelona']
+        merged_data = merged_data[merged_data['team_home'].isin(teams) | merged_data['team_away'].isin(teams)]
 
-# Filter out specific competitions
-if comps:
-    merged_data = merged_data[merged_data['tournament_name'].isin(comps)]
+    # Filter out specific competitions
+    if comps:
+        merged_data = merged_data[merged_data['tournament_name'].isin(comps)]
 
-# Filter for live games only
-if(isLive):
-    merged_data = merged_data[merged_data['live'] == 1]
+    # Filter for live games or highlights
+    if isLive and isHighlights:
+        merged_data = merged_data[(merged_data['highlights'] == 1) & (merged_data['live'] == 1)]
 
-if(isHighlights):
-    merged_data = merged_data[merged_data['highlights'] == 1]
+    if isLive and not isHighlights:
+        merged_data = merged_data[merged_data['live'] == 1]
 
-print(merged_data['tournament_name'])
+    if isHighlights and not isLive:
+        merged_data = merged_data[merged_data['highlights'] == 1]
 
-def main():
-    # Create the mip solver with the CP-SAT backend.
-    solver = pywraplp.Solver.CreateSolver("SAT")
+
+    print(merged_data['tournament_name'])
+
+    # Create the mip solver with the SCIP backend.
+    solver = pywraplp.Solver.CreateSolver("SCIP")
     if not solver:
         return
 
@@ -87,20 +93,28 @@ def main():
     print(f"Solving with {solver.SolverVersion()}")
     status = solver.Solve()
 
+    computed_result = {}
+
     if status == pywraplp.Solver.OPTIMAL:
         print("Solution:")
         print("Objective value =", solver.Objective().Value())
+        computed_result['objective_value'] = solver.Objective().Value()
+        selected_packages = []
         for pkg_id in package_vars:
             if package_vars[pkg_id].solution_value() == 1:
                 print(pkg_id, package_vars[pkg_id].solution_value())
+                selected_packages.append(int(pkg_id))
+        computed_result['selected_packages'] = selected_packages
+        computed_result['error'] = ""
     else:
         print("The problem does not have an optimal solution.")
+        computed_result['objective_value'] = None
+        computed_result['selected_packages'] = []
+        computed_result['error'] = "The problem does not have an optimal solution."
 
     print("\nAdvanced usage:")
     print(f"Problem solved in {solver.wall_time():d} milliseconds")
     print(f"Problem solved in {solver.iterations():d} iterations")
     print(f"Problem solved in {solver.nodes():d} branch-and-bound nodes")
 
-
-if __name__ == "__main__":
-    main()
+    return computed_result

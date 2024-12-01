@@ -4,10 +4,12 @@
     inherits: false;
   }
   
-  :root {
+  .card {
     --clr-1: blue;
     --clr-2: purple;
     --clr-3: lightblue;
+    --clr-4: #9ab9e0;
+    --clr-5: #87accf;
   }
   
   body {

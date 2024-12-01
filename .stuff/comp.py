@@ -19,7 +19,7 @@ def check_coverage(teams, packages):
     #merged_data = merged_data[merged_data['team_home'].isin(teams) | merged_data['team_away'].isin(teams)]
 
     # Filter for live games only
-    merged_data = merged_data[merged_data['live'] == 1]
+    # merged_data = merged_data[merged_data['live'] == 1]
 
     # Filter for specified streaming packages
     merged_data = merged_data[merged_data['name'].isin(packages)]
@@ -41,10 +41,11 @@ def check_coverage(teams, packages):
 
 # Example usage
 #teams = ['Bayern München','Borussia Dortmund','Schalke 04','Hamburger SV','SG Dynamo Dresden','1860 München','Real Madrid','Liverpool FC','Paris Saint-Germain','Juventus Turin','Galatasaray SK','Ajax Amsterdam','FC Porto','FK Austria Wien','Al-Nassr FC','Inter Miami CF']
-#teams = ['Bayern München', 'Galatasaray SK', 'Los Angeles Galaxy']
-packages = ['MagentaTV - MegaSport', 'Sky - Sport', 'Digiturk - Fußball + Family', 'Apple - MLS Season Pass', 'Sportdigital - Premium', 'Amazon - Prime Video', 'SportWorld - Samsung Sport Paket']
+teams = ['Bayern München', 'FC Barcelona']
+#packages = ['MagentaTV - MegaSport', 'Sky - Sport', 'Digiturk - Fußball + Family', 'Apple - MLS Season Pass', 'Sportdigital - Premium', 'Amazon - Prime Video', 'SportWorld - Samsung Sport Paket']
 #packages = ['MagentaTV - MegaSport', 'Sky - Sport', 'Digiturk - Fußball + Family', 'Apple - MLS Season Pass', 'RTL+ - Premium', 'Amazon - Prime Video', 'DAZN - Unlimited']
 #packages = ['MagentaTV - MegaSport', 'Digiturk - Fußball + Family', 'Apple - MLS Season Pass', 'RTL+ - Premium', 'Amazon - Prime Video']
+packages = ['MagentaTV - MegaSport']
 
 # Call the function with all teams
-check_coverage(all_teams, packages)
+check_coverage(teams, packages)

@@ -5,23 +5,20 @@ import DataTable from '../components/DataTable'
 
 export default function GamesPage() {
   return (
-    <Typography component='div'>
-      <div style={{
-      position: 'absolute',
-      height: '100vh',
-      width: '100vw'
-      }}>
-      <div style={{
-        position: 'absolute',
-        height: '100%',
-        width: '100vw',
-        backgroundImage: `url('/images/gamesBackground.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        zIndex: -1
-      }}/>
+    <div style={{flex: 1}}>
+            <iframe style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                backgroundImage: `url('/images/gamesBackground.jpg')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed',
+                zIndex: -1,
+                border: 0
+            }}/>
       <DataTable filename='bc_game' />
-      </div>
-    </Typography>
+    </div>
+    
     )
 }

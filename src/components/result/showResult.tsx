@@ -7,11 +7,11 @@ import { chosenPackages } from "./fetchBackendData"
 interface ShowResultProps {
     solverResult: chosenPackages[];
     loading: boolean;
-    games: any
+    games: any;
+    objectiveValue: number
 }
 
-export const ShowResult: React.FC<ShowResultProps> = ({ solverResult, loading, games }) => {
-    const totalPrice = solverResult.reduce((sum, result) => sum + result.packagePrice, 0);
+export const ShowResult: React.FC<ShowResultProps> = ({ solverResult, loading, games, objectiveValue }) => {
 
     return (
         <Typography component='div'>
@@ -23,7 +23,7 @@ export const ShowResult: React.FC<ShowResultProps> = ({ solverResult, loading, g
                             {loading ? (
                                 <Skeleton sx={{ width: 200 }} />
                             ) : (
-                                `Total Price: ${(totalPrice / 100)} €`
+                                `Total Price: ${(objectiveValue / 100)} €`
                             )}
                         </Typography>
                         <br/>

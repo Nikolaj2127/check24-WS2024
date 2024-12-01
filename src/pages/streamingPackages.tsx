@@ -5,24 +5,21 @@ import { PageContainer } from '@toolpad/core';
 
 export default function StreamingPackagesPage() {
   return (
-      <Typography component='div'>
-        <div style={{
-        position: 'absolute',
-        height: '100vh',
-        width: '100vw'
-        }}>
-        <div style={{
+    <div style={{flex: 1}}>
+      <iframe style={{
           position: 'absolute',
+          width: '100%',
           height: '100%',
-          width: '100vw',
           backgroundImage: `url('/images/footballPlayers.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          zIndex: -1
-        }}/>
-          <DataTable filename='bc_streaming_package' />
-        </div>
-      </Typography>
+          backgroundAttachment: 'fixed',
+          zIndex: -1,
+          border: 0
+      }}/>
+      <DataTable filename='bc_streaming_package' />
+    </div>
+    
   )
 }
 

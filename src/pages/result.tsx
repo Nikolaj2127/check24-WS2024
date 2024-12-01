@@ -21,6 +21,7 @@ export default function Result() {
     const [isLive, setIsLive] = useState(true)
     const [isHighlights, setIsHighlights] = useState(false)
     const [solverResult, setSolverResult] = useState<chosenPackages[]>([]);
+    const [objectiveValue, setObjectiveValue] = useState<number>()
     const [solverResultGames, setSolverResultGames] = useState<any[]>([])
     const [loading, setLoading] = useState<'yearly' | 'monthly' | 'live' | 'highlights' | null>('yearly');
 
@@ -50,33 +51,40 @@ export default function Result() {
 
     const handleHighlightsClick = (status: string) => {
       if(status === 'set') {
-        if(!isHighlights) {
+        if(isHighlights === false) {
           setIsHighlights(true)
           setLoading('highlights')
         }
       } else if (status === 'del') {
-        if(isHighlights) {
+        if(isHighlights === true) {
           setIsHighlights(false)
           setLoading('highlights')
         }
       }
+
+      console.log(isHighlights)
       
     }
 
     useEffect(() => {
-        if (selectedTeams.length > 0) {
+        if (selectedTeams.length > 0 || selectedComps.length > 0) {
           if (isYearly) {
             calcPackages('yearly', isLive, isHighlights)
           } else {
             calcPackages('monthly', isLive, isHighlights)
           }
+        } else {
+          throw new Error
         }
       }, [selectedTeams, isYearly, isLive, isHighlights]);
 
     async function calcPackages(subscriptionPayment: string, isLive: boolean, isHighlights: boolean) {
       const result = await fetchBackendData(selectedTeams, selectedComps ,subscriptionPayment, isLive, isHighlights)
+      console.log(result.chosenPackages)
+      console.log(result.objectiveValue)
       setSolverResult(result.chosenPackages)
       setSolverResultGames(result.mergedData)
+      setObjectiveValue(result.objectiveValue)
       setLoading(null)
     }
 
@@ -110,7 +118,6 @@ export default function Result() {
 
   return ( 
     <Typography component="div">
-      <PageContainer maxWidth={'xl'} style={{backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px', paddingBottom: 5}}>
         <Typography variant="h4">
           Best Package Combination:
         </Typography>
@@ -124,7 +131,7 @@ export default function Result() {
           handleHighlightsClick={handleHighlightsClick}
         />
         <br/>
-        <ShowResult solverResult={solverResult} games={solverResultGames} loading={loading !== null}/>
+        <ShowResult solverResult={solverResult} games={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
         <br/>
         {isYearly ? (
           <div>
@@ -148,7 +155,6 @@ export default function Result() {
         <Button type="button" variant="contained" color="primary" onClick={handleSaveTeamsButtonClick}>
             Save Team Selection
         </Button>
-      </PageContainer>
     </Typography>
   )
 }
