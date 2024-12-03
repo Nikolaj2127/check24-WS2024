@@ -61,9 +61,6 @@ def solver_function(input_json):
     if isHighlights and not isLive:
         merged_data = merged_data[merged_data['highlights'] == 1]
 
-
-    print(merged_data['tournament_name'])
-
     # Create the mip solver with the SCIP backend.
     solver = pywraplp.Solver.CreateSolver("SCIP")
     if not solver:
@@ -105,11 +102,18 @@ def solver_function(input_json):
                 print(pkg_id, package_vars[pkg_id].solution_value())
                 selected_packages.append(int(pkg_id))
         computed_result['selected_packages'] = selected_packages
+        
+        # Convert merged_data to a list of dictionaries
+        merged_data_list = merged_data.to_dict(orient='records')
+        computed_result['merged_data'] = merged_data_list
+        print('mergedData', merged_data_list)
+        
         computed_result['error'] = ""
     else:
         print("The problem does not have an optimal solution.")
         computed_result['objective_value'] = None
         computed_result['selected_packages'] = []
+        computed_result['merged_data'] = []
         computed_result['error'] = "The problem does not have an optimal solution."
 
     print("\nAdvanced usage:")

@@ -162,9 +162,7 @@ export default function CalculateBestPackagesPage() {
 
   return (
         <Typography component="div">
-          <div
-            style={{ display: "flex", flexDirection: "row" }}
-          >
+          <div style={{ display: "flex", flexDirection: "row" }}>
             <div style={{ marginRight: 20 }}>
                 <DataGridSelect isFiltered={isFiltered} filteredItems={filteredTeams} rows={teamRows} columns={teamColumns} handleSelectionChange={handleTeamSelectionChange} />
             </div>

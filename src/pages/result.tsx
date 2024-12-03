@@ -83,7 +83,13 @@ export default function Result() {
       console.log(result.chosenPackages)
       console.log(result.objectiveValue)
       setSolverResult(result.chosenPackages)
-      setSolverResultGames(result.mergedData)
+      setSolverResultGames(result.mergedData.map((data: any) => ({
+        tournamentName: data.tournament_name,
+        startsAt: data.starts_at,
+        teamHome: data.team_home,
+        teamAway: data.team_away,
+        dataPackageName: data.name
+      })));
       setObjectiveValue(result.objectiveValue)
       setLoading(null)
     }
@@ -131,7 +137,7 @@ export default function Result() {
           handleHighlightsClick={handleHighlightsClick}
         />
         <br/>
-        <ShowResult solverResult={solverResult} games={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
+        <ShowResult solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
         <br/>
         {isYearly ? (
           <div>

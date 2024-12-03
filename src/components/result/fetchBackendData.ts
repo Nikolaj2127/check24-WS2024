@@ -19,22 +19,9 @@ export async function fetchBackendData (teams: string[], comps: string[], subscr
     let chosenPackages: { packageId: number, packageName: string, packagePrice: number }[] = [];
     let packageName: string
     let packagePrice: number
+    let mergedData: any
 
-    // Merge datasets
-    let mergedData = offers.map(offer => {
-      const game = games.find(game => game.id === offer.game_id);
-      return { ...game, ...offer };
-    }).filter(row => row !== null) as any[];
-
-    // Filter for live games only
-    if (isLive) {
-      mergedData = mergedData.filter(row => row.live === 1);
-    }
-
-    // Filter for highlights only
-    if (isHighlights) {
-      mergedData = mergedData.filter(row => row.highlights === 1);
-    }
+    
 
     try {
         console.time('Fetching Time')
@@ -64,6 +51,8 @@ export async function fetchBackendData (teams: string[], comps: string[], subscr
         console.log(data)
 
         const selectedPackages = data.selected_packages;
+        mergedData = data.merged_data;
+        console.log('mergedData: ', mergedData)
         objectiveValue = data.objective_value;
         console.log('Selected packages:', selectedPackages);
 
@@ -115,5 +104,5 @@ export async function fetchBackendData (teams: string[], comps: string[], subscr
         chosenPackages = []
     }
     
-    return {chosenPackages: chosenPackages, objectiveValue: objectiveValue, mergedData: mergedData}
+    return {chosenPackages: chosenPackages, objectiveValue: objectiveValue, mergedData: mergedData || []}
 };

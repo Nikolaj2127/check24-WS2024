@@ -20,6 +20,7 @@ app.add_middleware(
 class SolveResponse(BaseModel):
     selected_packages: List[float]
     objective_value: float
+    merged_data: List[dict]
     error: str
 
 class SolveRequest(BaseModel):
