@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import Papa from 'papaparse'
 
 export interface bc_game {
@@ -29,109 +30,56 @@ export interface teams {
     starts_at: string;
     tournament_name: string;
 }
-  
-  const bc_gamePath = '/data/bc_game.csv';
-  const bc_streaming_offerPath = '/data/bc_streaming_offer.csv';
-  const bc_streaming_packagePath = '/data/bc_streaming_package.csv';
+
+let bc_game: bc_game[] = [];
+let bc_streaming_offer: bc_streaming_offer[] = [];
+let bc_streaming_package: bc_streaming_package[] = [];
 
 export async function fetchData(filename: string) {
-
-    if (filename == 'bc_game') {
-        const fetchCSV = async () => {
-            const response = await fetch(bc_gamePath)
-            const csvText = await response.text()
-            return new Promise((resolve, reject) => {
-                Papa.parse(csvText, {
-                    header: true,
-                    dynamicTyping: true,
-                    complete: (results) => {
-                        if (results.data) {
-                            resolve(results.data as bc_game[])
-                        } else {
-                            reject(new Error("Parsed data is undefined"))
-                        }
-                    },
-                    error: (error: Error) => {
-                        reject(error)
-                    }
-                })
-            })
-
-        }
-
+    
+    if (bc_game.length <= 0 || bc_streaming_offer.length <= 0 || bc_streaming_package.length <= 0) {
         try {
-            return await fetchCSV()
+            const response = await fetch('http://localhost:4000/getData', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            bc_game = data.bc_game;
+            bc_streaming_offer = data.bc_streaming_offer;
+            bc_streaming_package = data.bc_streaming_package;
+            
         } catch (error) {
-            console.error(error)
-            throw error
+            console.error('Fetch error:', error);
+            throw error;
         }
+    }
+        
 
-
-    } else if (filename == 'bc_streaming_offer') {
-        const fetchCSV = async () => {
-            const response = await fetch(bc_streaming_offerPath)
-            const csvText = await response.text()
-            return new Promise((resolve, reject) => {
-                Papa.parse(csvText, {
-                    header: true,
-                    dynamicTyping: true,
-                    complete: (results) => {
-                        resolve(results.data as bc_streaming_offer[])
-                    },
-                    error: (error: Error) => {
-                        reject(error)
-                    }
-                })
-            })
-
-        }
-
-        try {
-            return await fetchCSV()
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-
-    } else if (filename == 'bc_streaming_package') {
-        const fetchCSV = async () => {
-            const response = await fetch(bc_streaming_packagePath)
-            const csvText = await response.text()
-            return new Promise((resolve, reject) => {
-                Papa.parse(csvText, {
-                    header: true,
-                    dynamicTyping: true,
-                    complete: (results) => {
-                        if (results.data) {
-                            resolve(results.data as bc_streaming_package[])
-                        } else {
-                            reject(new Error("Parsed data is undefined"))
-                        }
-                    },
-                    error: (error: Error) => {
-                        reject(error)
-                    }
-                })
-            })
-
-        }
-
-        try {
-            return await fetchCSV()
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
+    if (filename === 'bc_game') {
+        return bc_game as bc_game[]
+    } else if (filename === 'bc_streaming_offer') {
+        return bc_streaming_offer as bc_streaming_offer[]
+    } else if (filename === 'bc_streaming_package') {
+        return bc_streaming_package as bc_streaming_package[]
     } else if (filename === 'teams') {
-        const gameData = await fetchData('bc_game') as bc_game[]
+        const gameData = bc_game as bc_game[]
         const uniqueTeams = Array.from(new Set(gameData.map(team => team.team_away && team.team_home)))
         return uniqueTeams as string[]
     } else if (filename === 'comps') {
-        const gameData = await fetchData('bc_game') as bc_game[]
+        const gameData = bc_game as bc_game[]
         const uniqueComps = Array.from(new Set(gameData.map(comp => comp.tournament_name)))
         return uniqueComps as string[]
     } else if (filename === 'comps_teams') {
-        const gameData = await fetchData('bc_game') as bc_game[];
+        const gameData = bc_game as any[]
 
         // Create a map of teams to competitions
         const teamsMap = new Map<string, { id: number, teamName: string, compNames: Set<string> }>();

@@ -56,20 +56,11 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
 
   return (
     <div>
-      <PageContainer style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', borderRadius: '15px', paddingBottom: 5 }}>
-          <div className="card" style={{
-            border: '0px solid',
-            borderRadius: '15px',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            height: '702px',
-            width: '100%'
-          }}>
-            <DataGrid
+          <DataGrid
               sx={{ 
                 borderRadius: '15px',
                 border: '0px',
                 padding: 2,
-                backgroundColor: 'transparent',
                 '& .header-left': {
                   borderTopLeftRadius: '15px',
                 },
@@ -80,13 +71,27 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
                   },
                 },
                 '& .MuiDataGrid-main': {
-                  borderRadius: '15px',
+                  borderRadius: "15px",
+                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
                 },
                 '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
-                  backgroundColor: 'rgb(6, 55, 115)',
+                  backgroundColor: "var(--primary)",
                 },
                 '& .MuiDataGrid-columnsContainer, .MuiDataGrid-cell': {
-                  backgroundColor: 'transparent',
+                  backgroundColor: "var(--item)",
+                },
+                
+                "& .MuiDataGrid-columnHeader": {
+                  backgroundColor: "var(--primary)",
+                },
+                "& .MuiDataGrid-columnSeparator": {
+                      color: "#FFFFFF",
+                  },
+                "& .MuiDataGrid-cell": {
+                  borderColor: "var(--primary)"
+                },
+                "& .MuiDataGrid-footerContainer": {
+                  borderColor: "transparent"
                 },
               }}
               rows={rows}
@@ -102,9 +107,6 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
               disableColumnResize={true}
               slots={{ toolbar: CustomToolbar }}
             />
-          </div>
-        
-      </PageContainer>
     </div>
   );
 }

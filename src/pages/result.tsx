@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, Typography, TextField } from '@mui/material';
 import { GridRowId } from '@mui/x-data-grid';
-import { chosenPackages, fetchBackendData } from '../components/result/fetchBackendData';
+import { chosenPackages, fetchSolverResult } from '../components/result/fetchSolverResult';
 import { ShowResult } from '../components/result/showResult';
 import ResultFiltering from '../components/result/resultFiltering';
 import { PageContainer } from '@toolpad/core';
@@ -79,7 +79,7 @@ export default function Result() {
       }, [selectedTeams, isYearly, isLive, isHighlights]);
 
     async function calcPackages(subscriptionPayment: string, isLive: boolean, isHighlights: boolean) {
-      const result = await fetchBackendData(selectedTeams, selectedComps ,subscriptionPayment, isLive, isHighlights)
+      const result = await fetchSolverResult(selectedTeams, selectedComps ,subscriptionPayment, isLive, isHighlights)
       console.log(result.chosenPackages)
       console.log(result.objectiveValue)
       setSolverResult(result.chosenPackages)

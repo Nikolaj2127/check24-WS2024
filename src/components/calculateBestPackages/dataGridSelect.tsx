@@ -14,8 +14,8 @@ export const DataGridSelect: React.FC<DataGridSelectProps> = ({isFiltered, filte
         <div>
             <DataGrid
                 sx={{
-                    height: "669.1px",
-                  width: 350,
+                  height: "669px",
+                  width: 320,
                   border: 0,
                   backgroundColor: 'var(--items)',
                   boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",

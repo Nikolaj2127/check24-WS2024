@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid2';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PackageCard from './packageCard';
 import ResultFiltering from './resultFiltering';
-import { chosenPackages } from "./fetchBackendData"
+import { chosenPackages } from "./fetchSolverResult"
 import { useEffect, useState } from "react";
 
 interface ShowResultProps {

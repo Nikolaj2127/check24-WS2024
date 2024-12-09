@@ -12,7 +12,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import WarningIcon from '@mui/icons-material/Warning';
-import { chosenPackages } from './fetchBackendData';
+import { chosenPackages } from './fetchSolverResult';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, List, ListItem, ListItemText, Skeleton } from '@mui/material';
 
 interface ExpandMoreProps extends IconButtonProps {

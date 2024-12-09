@@ -1,15 +1,12 @@
-import { PageContainer, DashboardLayout } from "@toolpad/core"
-import TestDataTable from "../components/testDataTable"
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid2';
 
 export default function Test() {
-    
-    return (
-        <div style={{flex: 1}}>
-            Hi
-            <PageContainer>
-                Hi
-            </PageContainer>
-        </div>
-        
-    )
+  
+  return (
+    <div>
+
+    </div>
+  );
 }

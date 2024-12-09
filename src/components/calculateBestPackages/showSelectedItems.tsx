@@ -1,6 +1,6 @@
 import React from 'react';
 import { FixedSizeList } from 'react-window';
-import { ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import { GridRowId } from '@mui/x-data-grid';
 
 interface ShowSelectedItemsProps {
@@ -12,9 +12,18 @@ interface ShowSelectedItemsProps {
 const ShowSelectedItems: React.FC<ShowSelectedItemsProps> = ({ itemIds, rows, type }) => {
     return (
         <div>
+            { type === 'teams' ? (
+              <Typography variant="h6" component="div" sx={{ padding: "16px" }}>
+                Selected Teams:
+              </Typography>
+            ) : (
+              <Typography variant="h6" component="div" sx={{ padding: "16px" }}>
+                Selected Competitions:
+              </Typography>
+            )}
             <FixedSizeList
                 height={600}
-                width={300}
+                width={320}
                 itemSize={46}
                 itemCount={itemIds.length}
                 overscanCount={5}

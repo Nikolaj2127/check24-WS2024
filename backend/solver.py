@@ -21,9 +21,9 @@ def solver_function(input_json):
     comps = input_json['comps']
 
     # Load the CSV data
-    bc_game = pd.read_csv('../public/data/bc_game.csv')
-    bc_streaming_offer = pd.read_csv('../public/data/bc_streaming_offer.csv')
-    bc_streaming_package = pd.read_csv('../public/data/bc_streaming_package.csv')
+    bc_game = pd.read_csv('./data/bc_game.csv')
+    bc_streaming_offer = pd.read_csv('./data/bc_streaming_offer.csv')
+    bc_streaming_package = pd.read_csv('./data/bc_streaming_package.csv')
 
     # Rename 'id' column to 'game_id' in bc_game
     bc_game.rename(columns={'id': 'game_id'}, inplace=True)

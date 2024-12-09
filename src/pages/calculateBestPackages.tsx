@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Box, Button, TextField } from "@mui/material";
-import { DataGrid, GridColDef, GridRowId, gridClasses } from "@mui/x-data-grid";
-import { FixedSizeList } from "react-window";
-import { PageContainer, useNotifications } from "@toolpad/core";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
+import { Typography, Box, Button } from "@mui/material";
+import Grid from '@mui/material/Grid2';
+import { GridColDef, GridRowId } from "@mui/x-data-grid";
+import { useNotifications } from "@toolpad/core";
 import { fetchData } from "../components/dataFetching/fetchData";
 import { useNavigate } from "react-router-dom";
-import CustomToolbar from "../components/customToolbar";
 import "../index.css";
 import { DataGridSelect } from "../components/calculateBestPackages/dataGridSelect";
 import ShowSelectedItems from "../components/calculateBestPackages/showSelectedItems";
-import { error } from "console";
+import ToggleButton from "../components/calculateBestPackages/toggleButton";
 
 const teamColumns: GridColDef[] = [
   {
@@ -162,47 +158,32 @@ export default function CalculateBestPackagesPage() {
 
   return (
         <Typography component="div">
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <div style={{ marginRight: 20 }}>
-                <DataGridSelect isFiltered={isFiltered} filteredItems={filteredTeams} rows={teamRows} columns={teamColumns} handleSelectionChange={handleTeamSelectionChange} />
-            </div>
-            <DataGridSelect isFiltered={isFiltered} filteredItems={filteredComps} rows={compRows} columns={compColumns} handleSelectionChange={handleCompSelectionChange} />
-            <Box sx={{ width: "20%", maxHeight: 600, maxWidth: 350 }}>
-              <Typography variant="h6" component="div" sx={{ padding: "16px" }}>
-                Selected Teams:
-              </Typography>
-              <ShowSelectedItems itemIds={selectedRowIds} rows={teamRows} type={'teams'} />
+            <Box sx={{ flexGrow: 1, p: 2 }}>
+              <Grid container spacing={3}>
+                <Grid>
+                    <DataGridSelect isFiltered={isFiltered} filteredItems={filteredTeams} rows={teamRows} columns={teamColumns} handleSelectionChange={handleTeamSelectionChange} />
+                </Grid>
+                <Grid>
+                  <DataGridSelect isFiltered={isFiltered} filteredItems={filteredComps} rows={compRows} columns={compColumns} handleSelectionChange={handleCompSelectionChange} />
+                </Grid>
+                <Grid>
+                  <Box sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                  }}>
+                    <Box>
+                      <ShowSelectedItems itemIds={selectedRowIds} rows={teamRows} type={'teams'} />
+                    </Box>
+                    <Box>
+                      <ShowSelectedItems itemIds={selectedCompRowIds} rows={compRows} type={'comps'} />
+                    </Box>
+                  </Box>
+                </Grid>
+              </Grid>
             </Box>
-            <Box sx={{ width: "20%", maxHeight: 600, maxWidth: 350 }}>
-              <Typography variant="h6" component="div" sx={{ padding: "16px" }}>
-                Selected Competitions:
-              </Typography>
-              <ShowSelectedItems itemIds={selectedCompRowIds} rows={compRows} type={'comps'} />
-            </Box>
-          </div>
           <br />
           <Box display="flex" justifyContent="space-between" width="100%">
-            {isFiltered ? (
-              <Button
-                sx={{ backgroundColor: '#284366', border: 2, borderColor: 'white', color: 'white'}}
-                type="button"
-                variant="contained"
-                color="primary"
-                onClick={handleFiltersToggleClick}
-              >
-                Show all options
-              </Button>
-            ) : (
-              <Button
-                sx={{ backgroundColor: '#284366', border: 2, borderColor: 'white', color: 'white'}}
-                type="button"
-                variant="contained"
-                color="primary"
-                onClick={handleFiltersToggleClick}
-              >
-                Show filtered options
-              </Button>
-            )}
+            <ToggleButton isFiltered={isFiltered} handleFiltersToggleClick={handleFiltersToggleClick}/>
             <Button
               sx={{ backgroundColor: '#284366', border: 2, borderColor: 'white', color: 'white'}}
               type="button"
