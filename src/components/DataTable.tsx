@@ -30,16 +30,18 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
     const getData = async () => {
       const result = await fetchData(filename);
       const formattedResult = (result as any[]).map((item: any) => {
-        if (item.monthly_price_cents === 0) {
-          item.monthly_price_cents = 'FREE';
-        } else if (item.monthly_price_cents !== null) {
-          item.monthly_price_cents = formatPrice(item.monthly_price_cents)
+        // Only format if the value is a number
+        if (typeof item.monthly_price_cents === 'number') {
+          item.monthly_price_cents = item.monthly_price_cents === 0 
+            ? 'FREE' 
+            : formatPrice(item.monthly_price_cents);
         }
-
-        if (item.monthly_price_yearly_subscription_in_cents === 0) {
-          item.monthly_price_yearly_subscription_in_cents = 'FREE';
-        } else {
-          item.monthly_price_yearly_subscription_in_cents = formatPrice(item.monthly_price_yearly_subscription_in_cents)
+    
+        if (typeof item.monthly_price_yearly_subscription_in_cents === 'number') {
+          item.monthly_price_yearly_subscription_in_cents = 
+            item.monthly_price_yearly_subscription_in_cents === 0
+              ? 'FREE'
+              : formatPrice(item.monthly_price_yearly_subscription_in_cents);
         }
         
         return item;
