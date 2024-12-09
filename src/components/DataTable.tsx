@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { Skeleton } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import { DataGrid, GridColDef, gridClasses } from '@mui/x-data-grid';
 import { PageContainer } from '@toolpad/core';
 import { fetchData, bc_game, bc_streaming_package } from './dataFetching/fetchData';
@@ -56,57 +56,64 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
 
   return (
     <div>
-          <DataGrid
-              sx={{ 
-                borderRadius: '15px',
-                border: '0px',
-                padding: 2,
-                '& .header-left': {
-                  borderTopLeftRadius: '15px',
-                },
-                '& .header-right': {
-                  borderTopRightRadius: '15px',
-                  [`& .${gridClasses.columnSeparator}`]: {
-                    display: 'none',
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+          <Box sx={{width: 850}}>
+            <DataGrid
+                sx={{
+                  width: 850,
+                  borderRadius: '15px',
+                  border: '0px',
+                  padding: 2,
+                  '& .header-left': {
+                    borderTopLeftRadius: '15px',
                   },
-                },
-                '& .MuiDataGrid-main': {
-                  borderRadius: "15px",
-                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                },
-                '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
-                  backgroundColor: "var(--primary)",
-                },
-                '& .MuiDataGrid-columnsContainer, .MuiDataGrid-cell': {
-                  backgroundColor: "var(--item)",
-                },
-                
-                "& .MuiDataGrid-columnHeader": {
-                  backgroundColor: "var(--primary)",
-                },
-                "& .MuiDataGrid-columnSeparator": {
-                      color: "#FFFFFF",
+                  '& .header-right': {
+                    borderTopRightRadius: '15px',
+                    [`& .${gridClasses.columnSeparator}`]: {
+                      display: 'none',
+                    },
                   },
-                "& .MuiDataGrid-cell": {
-                  borderColor: "var(--primary)"
-                },
-                "& .MuiDataGrid-footerContainer": {
-                  borderColor: "transparent"
-                },
-              }}
-              rows={rows}
-              columns={filename === 'bc_game' ? bc_game_columns : bc_streaming_package_columns}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 10,
+                  '& .MuiDataGrid-main': {
+                    borderRadius: "15px",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
                   },
-                },
-              }}
-              pageSizeOptions={[10]}
-              disableColumnResize={true}
-              slots={{ toolbar: CustomToolbar }}
-            />
+                  '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
+                    backgroundColor: "var(--primary)",
+                  },
+            
+                  "& .MuiDataGrid-columnHeader": {
+                    backgroundColor: "var(--primary)",
+                  },
+                  "& .MuiDataGrid-columnSeparator": {
+                        color: "#FFFFFF",
+                    },
+                  "& .MuiDataGrid-cell": {
+                    borderColor: "var(--primary)",
+                    backgroundColor: "var(--items)",
+                  },
+                  "& .MuiDataGrid-footerContainer": {
+                    borderColor: "transparent"
+                  },
+                }}
+                rows={rows}
+                columns={filename === 'bc_game' ? bc_game_columns : bc_streaming_package_columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 10,
+                    },
+                  },
+                }}
+                pageSizeOptions={[10]}
+                disableColumnResize={true}
+                slots={{ toolbar: CustomToolbar }}
+              />
+          </Box>
+      </Box>
     </div>
   );
 }

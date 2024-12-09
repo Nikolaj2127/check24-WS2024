@@ -10,6 +10,7 @@
     --clr-3: lightblue;
     --clr-4: #9ab9e0;
     --clr-5: #87accf;
+    --clr-6: var(--item);
   }
   
   body {

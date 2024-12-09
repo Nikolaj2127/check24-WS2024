@@ -38,6 +38,7 @@ let bc_streaming_package: bc_streaming_package[] = [];
 export async function fetchData(filename: string) {
     
     if (bc_game.length <= 0 || bc_streaming_offer.length <= 0 || bc_streaming_package.length <= 0) {
+        console.log("Fetching Data")
         try {
             const response = await fetch('http://localhost:4000/getData', {
                 method: 'GET',
