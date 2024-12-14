@@ -69,6 +69,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 
 export default function PackageCard({ packageName, packagePrice, loading, solverResultGames, onExpandChange }: PackageCardProps): JSX.Element {
   const [expanded, setExpanded] = useState(false);
+  console.log(packagePrice)
 
   const handleExpandClick = () => {
     const newExpanded = !expanded;
@@ -78,7 +79,7 @@ export default function PackageCard({ packageName, packagePrice, loading, solver
 
   const groupedGames = solverResultGames.reduce((acc: any, game: Game) => {
     if (!acc[game.tournamentName]) {
-      acc[game.tournamentName] = [];
+      acc[game.tournamentName] = []
   }
     // Use a Set to track unique games
     const uniqueGames = new Set(acc[game.tournamentName].map((g: Game) => JSON.stringify(g)));

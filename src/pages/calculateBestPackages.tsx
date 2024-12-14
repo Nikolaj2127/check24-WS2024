@@ -9,6 +9,7 @@ import "../index.css";
 import { DataGridSelect } from "../components/calculateBestPackages/dataGridSelect";
 import ShowSelectedItems from "../components/calculateBestPackages/showSelectedItems";
 import ToggleButton from "../components/calculateBestPackages/toggleButton";
+import MyDateRangePicker from "../components/utils/MyDateRangePicker";
 
 const teamColumns: GridColDef[] = [
   {
@@ -158,6 +159,19 @@ export default function CalculateBestPackagesPage() {
 
   return (
         <Typography component="div">
+          <Box display="flex" justifyContent="space-between" width="100%">
+            <ToggleButton isFiltered={isFiltered} handleFiltersToggleClick={handleFiltersToggleClick}/>
+            <Button
+              sx={{ backgroundColor: '#284366', border: 2, borderColor: 'white', color: 'white', mr: 1}}
+              type="button"
+              variant="contained"
+              color="primary"
+              onClick={handleButtonClick}
+            >
+              Select Teams
+            </Button>
+          </Box>
+          <br />
             <Box sx={{ flexGrow: 1, p: 2 }}>
               <Grid container spacing={3}>
                 <Grid>
@@ -167,6 +181,9 @@ export default function CalculateBestPackagesPage() {
                   <DataGridSelect isFiltered={isFiltered} filteredItems={filteredComps} rows={compRows} columns={compColumns} handleSelectionChange={handleCompSelectionChange} />
                 </Grid>
                 <Grid>
+                <Box>
+                  <MyDateRangePicker/>
+                </Box>
                   <Box sx={{
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -181,19 +198,6 @@ export default function CalculateBestPackagesPage() {
                 </Grid>
               </Grid>
             </Box>
-          <br />
-          <Box display="flex" justifyContent="space-between" width="100%">
-            <ToggleButton isFiltered={isFiltered} handleFiltersToggleClick={handleFiltersToggleClick}/>
-            <Button
-              sx={{ backgroundColor: '#284366', border: 2, borderColor: 'white', color: 'white'}}
-              type="button"
-              variant="contained"
-              color="primary"
-              onClick={handleButtonClick}
-            >
-              Select Teams
-            </Button>
-          </Box>
           <br />
         </Typography>
   );

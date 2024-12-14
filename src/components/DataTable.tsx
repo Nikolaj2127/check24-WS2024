@@ -29,7 +29,8 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
   useEffect(() => {
     const getData = async () => {
       const result = await fetchData(filename);
-      const formattedResult = (result as any[]).map((item: any) => {
+      if (filename === "bc_streaming_package") {
+        const formattedResult = (result as bc_streaming_package[]).map((item: any) => {
         // Only format if the value is a number
         if (typeof item.monthly_price_cents === 'number') {
           item.monthly_price_cents = item.monthly_price_cents === 0 
@@ -45,8 +46,11 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
         }
         
         return item;
-      });
-      setRows(formattedResult as T[]);
+        });
+        setRows(formattedResult as T[]);
+      } else {
+        setRows(result as T[]);
+      }
       setLoading(false);
     };
     getData();
@@ -103,6 +107,7 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
                 }}
                 rows={rows}
                 columns={filename === 'bc_game' ? bc_game_columns : bc_streaming_package_columns}
+                getRowId={filename === "bc_game" ? (row) => row.game_id : (row) => row.id}
                 initialState={{
                   pagination: {
                     paginationModel: {

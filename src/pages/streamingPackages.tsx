@@ -9,7 +9,7 @@ export default function StreamingPackagesPage() {
   const [isListView, setIsListView] = useState(true)
 
   return (
-    <Typography>
+    <Typography component="div">
       <div>
         {isListView ? (
           <DataTable filename='bc_streaming_package' />

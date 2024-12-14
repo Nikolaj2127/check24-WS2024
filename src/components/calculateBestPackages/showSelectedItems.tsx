@@ -22,7 +22,7 @@ const ShowSelectedItems: React.FC<ShowSelectedItemsProps> = ({ itemIds, rows, ty
               </Typography>
             )}
             <FixedSizeList
-                height={600}
+                height={500}
                 width={320}
                 itemSize={46}
                 itemCount={itemIds.length}

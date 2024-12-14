@@ -18,6 +18,10 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+bc_game = pd.read_csv('./data/bc_game.csv')
+bc_streaming_offer = pd.read_csv('./data/bc_streaming_offer.csv')
+bc_streaming_package = pd.read_csv('./data/bc_streaming_package.csv')
+
 class SolveResponse(BaseModel):
     selected_packages: List[float]
     objective_value: float
@@ -38,18 +42,15 @@ class Data(BaseModel):
 
 @app.post("/solve", response_model=SolveResponse)
 def solve(input_json: SolveRequest):
-    result = solver_function(input_json.dict())
+    result = solver_function(input_json.dict(), bc_game, bc_streaming_offer, bc_streaming_package)
     return result
 
 @app.get("/getData", response_model=Data)
 def get_data():
-    bc_game = pd.read_csv('./data/bc_game.csv').to_dict(orient='records')
-    bc_streaming_offer = pd.read_csv('./data/bc_streaming_offer.csv').to_dict(orient='records')
-    bc_streaming_package = pd.read_csv('./data/bc_streaming_package.csv').to_dict(orient='records')
     return {
-        'bc_game': bc_game,
-        'bc_streaming_offer': bc_streaming_offer,
-        'bc_streaming_package': bc_streaming_package
+        'bc_game': bc_game.to_dict(orient='records'),
+        'bc_streaming_offer': bc_streaming_offer.to_dict(orient='records'),
+        'bc_streaming_package': bc_streaming_package.to_dict(orient='records')
     }
 
 if __name__ == "__main__":
