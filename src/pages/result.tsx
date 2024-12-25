@@ -6,6 +6,7 @@ import { chosenPackages, fetchSolverResult } from '../components/result/fetchSol
 import { ShowResult } from '../components/result/showResult';
 import ResultFiltering from '../components/result/resultFiltering';
 import { PageContainer } from '@toolpad/core';
+import Carousel from '../components/streamingPackages/carousel';
 
 
 export default function Result() {
@@ -17,6 +18,7 @@ export default function Result() {
     const selectedComps= location.state?.selectedComps
     const selectedRowIds = location.state?.selectedRowIds as GridRowId[]
     const teamRows = location.state?.teamRows as { id: number, team: string }[]
+    const dates = location.state?.dates
     const [isYearly, setIsYearly] = useState(true)
     const [isLive, setIsLive] = useState(true)
     const [isHighlights, setIsHighlights] = useState(false)
@@ -24,6 +26,7 @@ export default function Result() {
     const [objectiveValue, setObjectiveValue] = useState<number>()
     const [solverResultGames, setSolverResultGames] = useState<any[]>([])
     const [loading, setLoading] = useState<'yearly' | 'monthly' | 'live' | 'highlights' | null>('yearly');
+    const [isCarousel, setIsCarousel] = useState(true)
 
     const handleYearlyClick = () => {
       setIsYearly(true)
@@ -79,18 +82,10 @@ export default function Result() {
       }, [selectedTeams, isYearly, isLive, isHighlights]);
 
     async function calcPackages(subscriptionPayment: string, isLive: boolean, isHighlights: boolean) {
-      const result = await fetchSolverResult(selectedTeams, selectedComps ,subscriptionPayment, isLive, isHighlights)
-      console.log(result.chosenPackages)
-      console.log(result.objectiveValue)
+      const result = await fetchSolverResult(selectedTeams, selectedComps ,subscriptionPayment, isLive, isHighlights, dates)
       setSolverResult(result.chosenPackages)
-      setSolverResultGames(result.mergedData.map((data: any) => ({
-        tournamentName: data.tournament_name,
-        startsAt: data.starts_at,
-        teamHome: data.team_home,
-        teamAway: data.team_away,
-        dataPackageName: data.name
-      })));
       setObjectiveValue(result.objectiveValue)
+      setSolverResultGames(result.solverResultGames)
       setLoading(null)
     }
 
@@ -137,13 +132,19 @@ export default function Result() {
           handleHighlightsClick={handleHighlightsClick}
         />
         <br/>
-        <ShowResult solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
+        { !isCarousel ? (
+          <ShowResult solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
+        ) : (
+          <Carousel solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
+        )}
         <br/>
         {isYearly ? (
           <div>
               The prices are monthly prices for a yearly subscription!
           </div>
         ) : null }
+        <br/>
+        <Button variant='contained' onClick={() => setIsCarousel(!isCarousel)}>Toggle Carousel</Button>
         <br/>
         <br/>
         <Button variant="contained" onClick={() => navigate('/calculate_best_packages')}>Back</Button>

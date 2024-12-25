@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 from solver import solver_function
+from mergeData import mergeData
 from typing import List
 
 app = FastAPI()
@@ -21,6 +22,7 @@ app.add_middleware(
 bc_game = pd.read_csv('./data/bc_game.csv')
 bc_streaming_offer = pd.read_csv('./data/bc_streaming_offer.csv')
 bc_streaming_package = pd.read_csv('./data/bc_streaming_package.csv')
+merged_data = mergeData(bc_game, bc_streaming_offer, bc_streaming_package)
 
 class SolveResponse(BaseModel):
     selected_packages: List[float]
@@ -34,15 +36,17 @@ class SolveRequest(BaseModel):
     isHighlights: bool
     teams: List[str]
     comps: List[str]
+    dates: List[str]
 
 class Data(BaseModel):
     bc_game: List[dict]
     bc_streaming_offer: List[dict]
     bc_streaming_package: List[dict]
+    merged_data: List[dict]
 
 @app.post("/solve", response_model=SolveResponse)
 def solve(input_json: SolveRequest):
-    result = solver_function(input_json.dict(), bc_game, bc_streaming_offer, bc_streaming_package)
+    result = solver_function(input_json.dict(), merged_data)
     return result
 
 @app.get("/getData", response_model=Data)
@@ -50,7 +54,8 @@ def get_data():
     return {
         'bc_game': bc_game.to_dict(orient='records'),
         'bc_streaming_offer': bc_streaming_offer.to_dict(orient='records'),
-        'bc_streaming_package': bc_streaming_package.to_dict(orient='records')
+        'bc_streaming_package': bc_streaming_package.to_dict(orient='records'),
+        'merged_data': merged_data.to_dict(orient='records')
     }
 
 if __name__ == "__main__":

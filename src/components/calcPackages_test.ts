@@ -10,6 +10,6 @@ export async function calcPackages_test(teams: string[], comps: string[], subscr
 
   //return await tree(mergedData, subscriptionPayment)
   //return await lpSolver(mergedData as mergedData[], subscriptionPayment);
-  return await fetchSolverResult(teams, comps, subscriptionPayment, false, false)
+  return await fetchSolverResult(teams, comps, subscriptionPayment, false, false, [])
 }
   

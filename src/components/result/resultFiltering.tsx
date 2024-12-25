@@ -67,6 +67,8 @@ export default function ResultFiltering({
     setOpen(!open);
   };
 
+  // TODO: Make selection also deselect filters
+
   const handleSetFilter = () => {
     let filterSet = false;
 

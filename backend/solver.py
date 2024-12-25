@@ -11,7 +11,7 @@ input_json = json.loads(input_data)
 
 print("input JSON: ", input_json) """
 
-def solver_function(input_json, bc_game, bc_streaming_offer, bc_streaming_package):
+def solver_function(input_json, merged_data):
 
     # Get input data
     payment = input_json['payment']
@@ -19,15 +19,7 @@ def solver_function(input_json, bc_game, bc_streaming_offer, bc_streaming_packag
     isHighlights = input_json['isHighlights']
     teams = input_json['teams']
     comps = input_json['comps']
-
-    # Rename 'id' column to 'game_id' in bc_game
-    bc_game.rename(columns={'id': 'game_id'}, inplace=True)
-
-    # Merge datasets
-    merged_data = pd.merge(bc_game, bc_streaming_offer, on='game_id')
-    merged_data = pd.merge(merged_data, bc_streaming_package, left_on='streaming_package_id', right_on='id')
-
-
+    dates = input_json['dates']
 
     if payment == 'monthly':
         merged_data = merged_data.dropna(subset=['monthly_price_cents'])
@@ -45,7 +37,7 @@ def solver_function(input_json, bc_game, bc_streaming_offer, bc_streaming_packag
         merged_data = merged_data[merged_data['tournament_name'].isin(comps)]
 
     # Filter for live games or highlights
-    if isLive and isHighlights:
+    if isLive and isHighlights or not isLive and not isHighlights:
         merged_data = merged_data[(merged_data['highlights'] == 1) & (merged_data['live'] == 1)]
 
     if isLive and not isHighlights:
@@ -53,6 +45,13 @@ def solver_function(input_json, bc_game, bc_streaming_offer, bc_streaming_packag
 
     if isHighlights and not isLive:
         merged_data = merged_data[merged_data['highlights'] == 1]
+
+    # Filter games within the date frame
+    if dates:
+        start_date = dates[0]
+        end_date = dates[1]
+        if start_date and end_date:
+            merged_data = merged_data[(merged_data['starts_at'] >= start_date) & (merged_data['starts_at'] <= end_date)]
 
     # Create the mip solver with the SCIP backend.
     solver = pywraplp.Solver.CreateSolver("SCIP")
@@ -92,14 +91,12 @@ def solver_function(input_json, bc_game, bc_streaming_offer, bc_streaming_packag
         selected_packages = []
         for pkg_id in package_vars:
             if package_vars[pkg_id].solution_value() == 1:
-                print(pkg_id, package_vars[pkg_id].solution_value())
                 selected_packages.append(int(pkg_id))
         computed_result['selected_packages'] = selected_packages
         
         # Convert merged_data to a list of dictionaries
         merged_data_list = merged_data.to_dict(orient='records')
         computed_result['merged_data'] = merged_data_list
-        print('mergedData', merged_data_list)
         
         computed_result['error'] = ""
     else:

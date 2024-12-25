@@ -34,6 +34,7 @@ export interface teams {
 let bc_game: bc_game[] = [];
 let bc_streaming_offer: bc_streaming_offer[] = [];
 let bc_streaming_package: bc_streaming_package[] = [];
+let merged_data: any = [];
 
 export async function fetchData(filename: string) {
     
@@ -57,6 +58,7 @@ export async function fetchData(filename: string) {
             bc_game = data.bc_game;
             bc_streaming_offer = data.bc_streaming_offer;
             bc_streaming_package = data.bc_streaming_package;
+            merged_data = data.merged_data
             
         } catch (error) {
             console.error('Fetch error:', error);
@@ -64,8 +66,9 @@ export async function fetchData(filename: string) {
         }
     }
         
-
-    if (filename === 'bc_game') {
+    if (filename === 'merged_data') {
+        return merged_data
+    } else if (filename === 'bc_game') {
         return bc_game as bc_game[]
     } else if (filename === 'bc_streaming_offer') {
         return bc_streaming_offer as bc_streaming_offer[]

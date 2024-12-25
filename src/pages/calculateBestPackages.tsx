@@ -9,7 +9,7 @@ import "../index.css";
 import { DataGridSelect } from "../components/calculateBestPackages/dataGridSelect";
 import ShowSelectedItems from "../components/calculateBestPackages/showSelectedItems";
 import ToggleButton from "../components/calculateBestPackages/toggleButton";
-import MyDateRangePicker from "../components/utils/MyDateRangePicker";
+import { MyDateRangePicker } from "../components/utils/MyDateRangePicker";
 
 const teamColumns: GridColDef[] = [
   {
@@ -58,6 +58,11 @@ export default function CalculateBestPackagesPage() {
   const [selectedCompRowIds, setSelectedCompRowIds] = useState<GridRowId[]>([]);
   const [filteredComps, setFilteredComps] = useState<any[]>(compRows);
   const [isFiltered, setIsFiltered] = useState(true);
+  const [dates, setDates] = useState<string[]>([])
+
+  useEffect(() => {
+    console.log(dates)
+  }, [dates])
 
   useEffect(() => {
     const getData = async () => {
@@ -147,7 +152,7 @@ export default function CalculateBestPackagesPage() {
         .map((id) => compRows.find((row) => row.id === id)?.competition)
         .filter(Boolean) as string[];
       navigate("/calculate_best_packages/result", {
-        state: { selectedTeams, selectedComps, selectedRowIds, teamRows },
+        state: { selectedTeams, selectedComps, selectedRowIds, teamRows, dates },
       });
     } else {
       notifications.show('Please select a team or comptetition!', {
@@ -182,7 +187,7 @@ export default function CalculateBestPackagesPage() {
                 </Grid>
                 <Grid>
                 <Box>
-                  <MyDateRangePicker/>
+                  <MyDateRangePicker setDates={setDates}/>
                 </Box>
                   <Box sx={{
                     display: 'flex',

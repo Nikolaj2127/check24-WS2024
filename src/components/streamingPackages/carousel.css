@@ -1,0 +1,24 @@
+.carousel-container {
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 10px;
+    scroll-behavior: smooth;
+  }
+  .carousel-slide {
+    flex: 1 0 15%;
+    flex-flow: column nowrap;
+    scroll-snap-align: start;
+  }
+  @media (max-width: 300px) {
+    .carousel-slide {
+      flex: 1 0 90%;
+    }
+  }
+
+  .sticky-header {
+    position: -webkit-sticky;
+    position: sticky;
+    z-index: 1000;
+    top: 0;
+  }
