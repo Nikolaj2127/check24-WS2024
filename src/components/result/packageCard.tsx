@@ -29,7 +29,7 @@ interface PackageCardProps {
   packagePrice: number
   loading: boolean
   solverResultGames: Game[]
-  onExpandChange: (isExpanded: boolean) => void;
+  onExpandChange?: (isExpanded: boolean) => void;
 }
 
 const ExpandMore = styled((props: ExpandMoreProps) => {
@@ -63,12 +63,10 @@ export default function PackageCard({ packageName, packagePrice, loading, onExpa
   const handleExpandClick = () => {
     const newExpanded = !expanded;
     setExpanded(newExpanded);
-    onExpandChange(newExpanded);
+    if (onExpandChange) {
+      onExpandChange(newExpanded);
+    }
   };
-
-  useEffect(() => {
-    console.log(loading)
-  })
 
   return (
     <Card sx={{ width: 300 }}>

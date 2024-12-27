@@ -1,15 +1,4 @@
 from ortools.linear_solver import pywraplp
-import pandas as pd
-import sys
-import json
-import io
-
-""" input_data = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8').read()
-
-print("input Data: ", input_data)
-input_json = json.loads(input_data)
-
-print("input JSON: ", input_json) """
 
 def solver_function(input_json, merged_data):
 
@@ -20,6 +9,12 @@ def solver_function(input_json, merged_data):
     teams = input_json['teams']
     comps = input_json['comps']
     dates = input_json['dates']
+    print(payment)
+    print(teams)
+    print(comps)
+    print(isLive)
+    print(isHighlights)
+    print(dates)
 
     if payment == 'monthly':
         merged_data = merged_data.dropna(subset=['monthly_price_cents'])
@@ -37,14 +32,16 @@ def solver_function(input_json, merged_data):
         merged_data = merged_data[merged_data['tournament_name'].isin(comps)]
 
     # Filter for live games or highlights
-    if isLive and isHighlights or not isLive and not isHighlights:
+    if isLive and isHighlights:
         merged_data = merged_data[(merged_data['highlights'] == 1) & (merged_data['live'] == 1)]
-
-    if isLive and not isHighlights:
+    elif isLive and not isHighlights:
         merged_data = merged_data[merged_data['live'] == 1]
-
-    if isHighlights and not isLive:
+    elif isHighlights and not isLive:
         merged_data = merged_data[merged_data['highlights'] == 1]
+    else:
+        merged_data = merged_data
+        
+    print(merged_data)
 
     # Filter games within the date frame
     if dates:
@@ -58,24 +55,31 @@ def solver_function(input_json, merged_data):
     if not solver:
         return
 
+    solver.EnableOutput()  # Enable detailed logging
+
     infinity = solver.infinity()
     # Define the decision variables
     package_vars = {}
     for pkg_id in merged_data['streaming_package_id'].unique():
         package_vars[pkg_id] = solver.IntVar(0, infinity, str(pkg_id))
 
+    print(package_vars)
+
     print("Number of variables =", solver.NumVariables())
     
     # Define the constraints (cover all selected games)
     for game_id in merged_data['game_id'].unique():
         relevant_packages = merged_data[merged_data['game_id'] == game_id]['streaming_package_id']
-        solver.Add(solver.Sum([package_vars[pkg_id] for pkg_id in relevant_packages]) >= 1)
-    
+        ct = solver.Constraint(1, infinity, f'ct_{game_id}')
+        for pkg_id in relevant_packages:
+            ct.SetCoefficient(package_vars[pkg_id], 1)
+
     print("Number of constraints =", solver.NumConstraints())
 
     # Objective Function
     if payment == 'yearly':
         solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_yearly_subscription_in_cents'].iloc[0] for pkg_id in package_vars]))
+        
     elif payment == 'monthly':
         solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_cents'].iloc[0] for pkg_id in package_vars]))
 
@@ -92,6 +96,7 @@ def solver_function(input_json, merged_data):
         for pkg_id in package_vars:
             if package_vars[pkg_id].solution_value() == 1:
                 selected_packages.append(int(pkg_id))
+        print(selected_packages)
         computed_result['selected_packages'] = selected_packages
         
         # Convert merged_data to a list of dictionaries

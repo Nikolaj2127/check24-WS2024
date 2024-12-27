@@ -11,7 +11,7 @@ import ShowSelectedItems from "../components/calculateBestPackages/showSelectedI
 import ToggleButton from "../components/calculateBestPackages/toggleButton";
 import { MyDateRangePicker } from "../components/utils/MyDateRangePicker";
 
-const teamColumns: GridColDef[] = [
+export const teamColumns: GridColDef[] = [
   {
     field: "teamName",
     headerName: "Team",
@@ -20,7 +20,7 @@ const teamColumns: GridColDef[] = [
   },
 ];
 
-const compColumns: GridColDef[] = [
+export const compColumns: GridColDef[] = [
   {
     field: "competition",
     headerName: "Wettbewerbe",
@@ -29,21 +29,21 @@ const compColumns: GridColDef[] = [
   },
 ];
 
-interface TeamType {
+export interface TeamType {
   id: number;
   gameId: number;
   teamName: string;
   compNames: string[];
 }
 
-interface CompType {
+export interface CompType {
   id: number;
   gameId: number;
   competition: string;
   teamNames: string[];
 }
 
-interface TeamCompType {
+export interface TeamCompType {
   teams: TeamType[];
   comps: CompType[];
 }
@@ -180,10 +180,10 @@ export default function CalculateBestPackagesPage() {
             <Box sx={{ flexGrow: 1, p: 2 }}>
               <Grid container spacing={3}>
                 <Grid>
-                    <DataGridSelect isFiltered={isFiltered} filteredItems={filteredTeams} rows={teamRows} columns={teamColumns} handleSelectionChange={handleTeamSelectionChange} />
+                    <DataGridSelect isFiltered={isFiltered} filteredItems={filteredTeams} rows={teamRows} columns={teamColumns} checkboxSelection={true} handleSelectionChange={handleTeamSelectionChange} />
                 </Grid>
                 <Grid>
-                  <DataGridSelect isFiltered={isFiltered} filteredItems={filteredComps} rows={compRows} columns={compColumns} handleSelectionChange={handleCompSelectionChange} />
+                  <DataGridSelect isFiltered={isFiltered} filteredItems={filteredComps} rows={compRows} columns={compColumns} checkboxSelection={true} handleSelectionChange={handleCompSelectionChange} />
                 </Grid>
                 <Grid>
                 <Box>

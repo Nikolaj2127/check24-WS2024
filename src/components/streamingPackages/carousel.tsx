@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import PackageCard from '../result/packageCard';
-import { Box, Button, IconButton, List, ListItemText, Skeleton, Table, TableBody, TableContainer, TableRow, Typography } from '@mui/material';
+import { Box, Button, IconButton, List, ListItem, ListItemButton, ListItemText, Skeleton, Table, TableBody, TableContainer, TableRow, Typography } from '@mui/material';
 import { chosenPackages } from '../result/fetchSolverResult';
 import { Game } from '../result/showResult';
 import _ from 'lodash';
@@ -27,18 +27,27 @@ interface CarouselProps {
   objectiveValue: number;
 }
 
-const Carousel: React.FC<CarouselProps> = ({ solverResult, loading, solverResultGames, objectiveValue }) => {
-  const [expandedCount, setExpandedCount] = useState(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(1);
-  const [solverResultGroupedGames, setSolverResultGroupedGames] = useState<{ [key: string]: Game[] }>({})
-  const [openAccordions, setOpenAccordions] = useState<string[]>([])
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isFewCards = solverResult.length <= visibleCount;
- 
+export interface GroupedGame {
+    game_id: number
+    highlights: number
+    live: number
+    packageNames: string[]
+    tournamentName: string;
+    starts_at: string;
+    team_home: string;
+    team_away: string;
+}
 
+const Carousel: React.FC<CarouselProps> = ({ solverResult, loading, solverResultGames, objectiveValue }) => {
+  const [visibleCount, setVisibleCount] = useState(1);
+  const [solverResultGroupedGames, setSolverResultGroupedGames] = useState<{ [key: string]: GroupedGame[] }>({})
+  const [openAccordions, setOpenAccordions] = useState<string[]>([])
+const [listItems, setListItems] = useState<chosenPackages[]>([])
+  const [filteredSolverResult, setFilteredSolverResult] = useState<chosenPackages[]>([])
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isFewCards = filteredSolverResult.length <= visibleCount;
   const carousel = document.querySelector(".carousel-container");
-    const slide = document.querySelector(".carousel-slide");
+const slide = document.querySelector(".carousel-slide");
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,12 +64,6 @@ const Carousel: React.FC<CarouselProps> = ({ solverResult, loading, solverResult
     return () => window.removeEventListener('resize', handleResize);
   }, [containerRef, solverResult]);
 
-  const handleExpandChange = (isExpanded: boolean) => {
-    setExpandedCount((prevCount) =>
-      isExpanded ? prevCount + 1 : prevCount - 1
-    );
-  };
-
   function handleCarouselMove(positive = true) {
     if (slide) {
       const slideWidth = slide.clientWidth;
@@ -70,25 +73,64 @@ const Carousel: React.FC<CarouselProps> = ({ solverResult, loading, solverResult
     }
   }
 
+  // Group Games by Competition
   useEffect(() => {
-    if (Object.keys(solverResultGroupedGames).length === 0 ){
         const group = (array: any) => {
-        const uniqueGames = solverResultGames.filter((game, index, self) => 
-        index === self.findIndex((g) => g.game_id === game.game_id)
-        );
-        const grouped = _.groupBy(uniqueGames, (game: any) => game.tournament_name);
-        console.log(grouped)
-        return grouped
+            const gameMap = new Map()
+            array.forEach((game: Game) => {
+                if(!gameMap.has(game.game_id)) {
+                    gameMap.set(game.game_id, { ...game, packageNames: [game.name]})
+                } else {
+                    gameMap.get(game.game_id).packageNames.push(game.name)
+                }
+            })
+            let uniqueGames = Array.from(gameMap.values())
+            uniqueGames = uniqueGames.map(({ name, streaming_package_id, id, monthly_price_cents, monthly_price_yearly_subscription_in_cents, ...rest}) => rest)
+            const grouped = _.groupBy(uniqueGames, (game: any) => game.tournament_name);
+            return grouped
       };
+      console.log('solResGamlen',solverResultGames.length)
       setSolverResultGroupedGames(group(solverResultGames))
-    }
-      
+    
   }, [solverResultGames])
-  
-  useEffect(() => {
-    console.log('gLoad')
-  }, [])
 
+  // Console log some stuff
+  useEffect(() => {
+    console.log('srl',solverResultGames.length)
+    console.log('sgl',solverResultGroupedGames)
+}, [solverResultGames, solverResultGroupedGames])
+
+// Initialize filteredSolverResult with solverResult
+  useEffect(() => {
+        setFilteredSolverResult(solverResult)
+  }, [solverResult])
+
+    const handlePackageFilterClick = (solverResultItem: any, index: number) => {
+        if (index !== -1) {
+            const updatedFilteredSolverResult = filteredSolverResult.filter((_, i) => i !== index);
+            setFilteredSolverResult(updatedFilteredSolverResult);
+            setListItems([...listItems, solverResultItem]);
+        }
+    }
+
+    const handleListClick = (listItem: any, index: number) => {
+        if (index !== -1) {
+            const updatedListItems = listItems.filter((_, i) => i !== index);
+            setFilteredSolverResult([...filteredSolverResult, listItem]);
+            setListItems(updatedListItems);
+        }
+    }
+
+    const handleAllListClick = () => {
+        const updatedFilteredSolverResult = [...filteredSolverResult, ...listItems];
+        setFilteredSolverResult(updatedFilteredSolverResult);
+        setListItems([]);
+    }
+
+    // In carousel.tsx
+    useEffect(() => {
+        console.log('Filtered Grouped Solver Result:', Object.keys(solverResultGroupedGames).length);
+    }, [solverResultGroupedGames]);
   
 
   return (
@@ -97,14 +139,36 @@ const Carousel: React.FC<CarouselProps> = ({ solverResult, loading, solverResult
             <IconButton onClick={() => handleCarouselMove(false)} sx={{border: 2, marginBottom: 2}}>
                 <KeyboardArrowLeftRoundedIcon/>
             </IconButton>
-                  <IconButton onClick={() => handleCarouselMove()}sx={{border: 2, marginBottom: 2, marginLeft: 1}}>
-            <KeyboardArrowRightRoundedIcon/>
-                  </IconButton>
+            <IconButton onClick={() => handleCarouselMove()}sx={{border: 2, marginBottom: 2, marginLeft: 1}}>
+                <KeyboardArrowRightRoundedIcon/>
+            </IconButton>
         </div>
       <div>
           <Box sx={{display: 'flex'}}>
-            
-                <div style={{width: 300, marginTop: 408}}>
+                <div style={{width: 300}}>
+                    <Button onClick={() => handleAllListClick()}>Add all Back</Button>
+                    <div style={{height: 408, paddingRight: 5}}>
+                        <List dense sx={{backgroundColor: 'var(--primary)', borderRadius: 1}}>
+                            {listItems.length > 0 ? (
+                                <div>
+                                    {listItems.map((item, index) => (
+                                        <ListItemButton key={index} onClick={() => handleListClick(item, index)}>
+                                            <ListItemText
+                                                primary={item.packageName}
+                                                secondary={null}
+                                            />
+                                        </ListItemButton>
+                                    ))}
+                                </div>
+                            ) : (
+                                <ListItem>
+                                    <ListItemText>
+                                        Removed packages will appear here
+                                    </ListItemText>
+                                </ListItem>
+                            )}
+                        </List>
+                    </div>
                 {Object.keys(solverResultGroupedGames).length > 0 ? ( 
                     <div>
                         {Object.keys(solverResultGroupedGames).map((tournamentName, index) => (
@@ -173,34 +237,40 @@ const Carousel: React.FC<CarouselProps> = ({ solverResult, loading, solverResult
                                     packagePrice={0}
                                     loading={loading}
                                     solverResultGames={[]}
-                                    onExpandChange={handleExpandChange}
                                 />
                             </div>
                         ))
-                    : solverResult.map((item, index) => (
+                    : filteredSolverResult.map((item, index) => (
                         <div className='carousel-slide' key={index}>
-                                <PackageCard
-                                key={index}
-                                packageName={item.packageName}
-                                packagePrice={item.packagePrice}
-                                loading={loading}
-                                solverResultGames={solverResultGames}
-                                onExpandChange={handleExpandChange}
-                                />
+                                <div>
+                                    <Button onClick={() => handlePackageFilterClick(item, index)} disabled={filteredSolverResult.length <= 1}>Remove</Button>
+                                    <PackageCard
+                                    key={index}
+                                    packageName={item.packageName}
+                                    packagePrice={item.packagePrice}
+                                    loading={loading}
+                                    solverResultGames={solverResultGames}
+                                    />
+                                </div>
                         </div>
                     ))}
                 </div>
                 { Object.keys(solverResultGroupedGames).length > 0 ? (
-                    <div style={{overflowX: 'auto', width: 310 * solverResult.length - 10, marginTop: 10, marginBottom: 2}}>
+                    <div style={{overflowX: 'auto', width: 310 * filteredSolverResult.length - 10, marginTop: 10, marginBottom: 2}}>
                         {Object.keys(solverResultGroupedGames).map((tournamentName, index) => (
-                        <LazyAccordion key={index} tournamentName={tournamentName} games={solverResultGroupedGames[tournamentName]} solverResult={solverResult} openAccordions={openAccordions} />
+                            <LazyAccordion 
+                            key={index} 
+                            tournamentName={tournamentName} 
+                            games={solverResultGroupedGames[tournamentName]} 
+                            solverResult={filteredSolverResult} 
+                            openAccordions={openAccordions}
+                            />
                         ))}
                     </div>
                 ):(
                     <div style={{ marginTop: 10, paddingLeft: 5}}>
-                        <Skeleton animation="wave" sx={{height: 48}} />
+                        <Skeleton animation="wave" sx={{height: 48}}/>
                     </div>
-                    
                 )}
             </div>
           </Box>

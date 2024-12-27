@@ -20,8 +20,8 @@ export interface Game {
   starts_at: string;
   team_home: string;
   team_away: string;
-  dataPackageName: string;
   name?: string
+  packageNames?: string[]
 }
 
 export const ShowResult: React.FC<ShowResultProps> = ({ solverResult, loading, objectiveValue }) => {

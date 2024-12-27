@@ -12,15 +12,15 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import ListItemText from '@mui/material/ListItemText';
 import useLazyLoad from '../../hooks/useLazyLoad';
-import { Game } from '../result/showResult';
 import { Box } from '@mui/material';
 import { chosenPackages } from '../result/fetchSolverResult';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import { GroupedGame } from './carousel';
 
 interface LazyAccordionProps {
   tournamentName: string;
-  games: Game[];
+  games: GroupedGame[];
   solverResult: chosenPackages[]
   openAccordions: string[]
 }
@@ -29,8 +29,8 @@ const LazyAccordion: React.FC<LazyAccordionProps> = ({ tournamentName, games, op
   const [isVisible, ref] = useLazyLoad();
   const packageNames = solverResult.map(pkg => pkg.packageName)
 
-  const getCoverageStatus = (games: Game[], packageName: string) => {
-    const coveredGames = games.filter(game => game.name === packageName);
+  const getCoverageStatus = (games: GroupedGame[], packageName: string) => {
+    const coveredGames = games.filter(game => game.packageNames?.includes(packageName));
     let status = ''
     if (coveredGames.length === games.length) {
         status = 'all';
@@ -43,6 +43,11 @@ const LazyAccordion: React.FC<LazyAccordionProps> = ({ tournamentName, games, op
   };
 
   
+
+  useEffect(() => {
+    //console.log('LazyAccordion received new games:', games);
+  }, [games]);
+  
   return (
     <Accordion
         slotProps={{ transition: { unmountOnExit: true } }}
@@ -51,10 +56,10 @@ const LazyAccordion: React.FC<LazyAccordionProps> = ({ tournamentName, games, op
         sx={{boxShadow: 'none'}}
     >
       <AccordionSummary>
-        {packageNames.map((pkg, pkgIdx) => {
-        const { coverageStatus, count } = getCoverageStatus(games, pkg);
+        {solverResult.map((pkg) => {
+        const { coverageStatus, count } = getCoverageStatus(games, pkg.packageName);
         return (
-            <Box key={pkgIdx} sx={{display: 'flex', justifyContent: 'left', alignItems: 'center', flex: 1, height: 20}}>
+            <Box key={pkg.packageId} sx={{display: 'flex', justifyContent: 'left', alignItems: 'center', flex: 1, height: 20}}>
                 <Box sx={{marginLeft: 5}}>
                     {coverageStatus === 'all' && <CheckIcon color="success" />}
                     {coverageStatus === 'partial' && <CheckIcon color="warning" />}
@@ -74,7 +79,7 @@ const LazyAccordion: React.FC<LazyAccordionProps> = ({ tournamentName, games, op
                       {packageNames.map((pkg, pkgIdx) => (
                       <TableCell key={pkgIdx} sx={{height: 130}}>
                         <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        {game.name === pkg ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
+                        {game.packageNames?.includes(pkg) ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
                         </div>
                       </TableCell>
                     ))}

@@ -6,10 +6,11 @@ interface DataGridSelectProps {
     filteredItems: any[];
     rows: any[];
     columns: GridColDef[];
-    handleSelectionChange: (selectionModel: readonly GridRowId[]) => void;
+    checkboxSelection: boolean
+    handleSelectionChange?: (selectionModel: readonly GridRowId[]) => void;
   }
 
-export const DataGridSelect: React.FC<DataGridSelectProps> = ({isFiltered, filteredItems, rows, columns, handleSelectionChange}) => {
+export const DataGridSelect: React.FC<DataGridSelectProps> = ({isFiltered, filteredItems, rows, columns, checkboxSelection, handleSelectionChange}) => {
     return (
         <div>
             <DataGrid
@@ -49,7 +50,7 @@ export const DataGridSelect: React.FC<DataGridSelectProps> = ({isFiltered, filte
                 }}
                 disableColumnResize={true}
                 pageSizeOptions={[10]}
-                checkboxSelection
+                checkboxSelection={checkboxSelection}
                 keepNonExistentRowsSelected
                 disableColumnFilter
                 disableColumnSelector

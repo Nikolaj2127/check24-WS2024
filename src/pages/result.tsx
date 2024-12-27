@@ -28,6 +28,8 @@ export default function Result() {
     const [loading, setLoading] = useState<'yearly' | 'monthly' | 'live' | 'highlights' | null>('yearly');
     const [isCarousel, setIsCarousel] = useState(true)
 
+    console.log('selecTeams', selectedTeams)
+
     const handleYearlyClick = () => {
       setIsYearly(true)
       setLoading('yearly')
@@ -64,9 +66,6 @@ export default function Result() {
           setLoading('highlights')
         }
       }
-
-      console.log(isHighlights)
-      
     }
 
     useEffect(() => {
@@ -83,6 +82,7 @@ export default function Result() {
 
     async function calcPackages(subscriptionPayment: string, isLive: boolean, isHighlights: boolean) {
       const result = await fetchSolverResult(selectedTeams, selectedComps ,subscriptionPayment, isLive, isHighlights, dates)
+      console.log('solResGamlen', result.solverResultGames.length)
       setSolverResult(result.chosenPackages)
       setObjectiveValue(result.objectiveValue)
       setSolverResultGames(result.solverResultGames)

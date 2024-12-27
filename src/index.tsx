@@ -10,6 +10,7 @@ import CalculateBestPackagesPage from './pages/calculateBestPackages';
 import teamCollections from './pages/teamCollections';
 import Result from './pages/result';
 import Test from './pages/test';
+import Tournament from './pages/tournament';
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
           {
             path: '/calculate_best_packages',
             Component: CalculateBestPackagesPage,
+          },
+          {
+            path: '/tournaments',
+            Component: Tournament,
           },
           {
             path: '/collections',
