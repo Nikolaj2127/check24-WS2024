@@ -48,6 +48,7 @@ export const DataGridSelect: React.FC<DataGridSelectProps> = ({isFiltered, filte
                     },
                   },
                 }}
+                autosizeOnMount
                 disableColumnResize={true}
                 pageSizeOptions={[10]}
                 checkboxSelection={checkboxSelection}

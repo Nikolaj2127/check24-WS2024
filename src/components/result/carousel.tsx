@@ -18,17 +18,12 @@ import {
 import { chosenPackages } from "../result/fetchSolverResult";
 import { Game } from "../result/showResult";
 import _ from "lodash";
-import useLazyLoad from "../../hooks/useLazyLoad";
-import Accordion from "@mui/material/Accordion";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import TableCell from "@mui/material/TableCell";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
+
+import { group } from "./groupGames";
 import "./carousel.css";
 import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import GameAccordion from "./gameAccordion";
 
 //TODO: Make Package Name sticky
 
@@ -60,10 +55,14 @@ const Carousel: React.FC<CarouselProps> = ({
   objectiveValue,
   isLiveAndHighlights,
 }) => {
-  const [solverResultGroupedGames, setSolverResultGroupedGames] = useState<{[key: string]: GroupedGame[];}>({});
+  const [solverResultGroupedGames, setSolverResultGroupedGames] = useState<{
+    [key: string]: GroupedGame[];
+  }>({});
   const [openAccordions, setOpenAccordions] = useState<string[]>([]);
   const [listItems, setListItems] = useState<chosenPackages[]>([]);
-  const [filteredSolverResult, setFilteredSolverResult] = useState<chosenPackages[]>([]);
+  const [filteredSolverResult, setFilteredSolverResult] = useState<
+    chosenPackages[]
+  >([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const carousel = document.querySelector(".carousel-container");
   const slide = document.querySelector(".carousel-slide");
@@ -81,46 +80,6 @@ const Carousel: React.FC<CarouselProps> = ({
 
   // Group Games by Competition
   useEffect(() => {
-    const group = (array: any) => {
-      const gameMap = new Map();
-      array.forEach((game: Game) => {
-        if (!gameMap.has(game.game_id)) {
-          gameMap.set(game.game_id, {
-            ...game,
-            packages: [
-              { name: game.name, live: game.live, highlights: game.highlights },
-            ],
-          });
-        } else {
-          gameMap
-            .get(game.game_id)
-            .packages.push({
-              name: game.name,
-              live: game.live,
-              highlights: game.highlights,
-            });
-        }
-      });
-      let uniqueGames = Array.from(gameMap.values());
-      uniqueGames = uniqueGames.map(
-        ({
-          name,
-          streaming_package_id,
-          id,
-          monthly_price_cents,
-          monthly_price_yearly_subscription_in_cents,
-          live,
-          highlights,
-          ...rest
-        }) => rest
-      );
-      const grouped = _.groupBy(
-        uniqueGames,
-        (game: any) => game.tournament_name
-      );
-      return grouped;
-    };
-    console.log("solResGamlen", solverResultGames.length);
     setSolverResultGroupedGames(group(solverResultGames));
   }, [solverResultGames]);
 
@@ -153,29 +112,26 @@ const Carousel: React.FC<CarouselProps> = ({
     setListItems([]);
   };
 
-  // In carousel.tsx
-  useEffect(() => {
-    console.log(
-      "Filtered Grouped Solver Result:",
-      Object.keys(solverResultGroupedGames).length
-    );
-  }, [solverResultGroupedGames]);
-
   return (
-    <div style={{ width: "90vw" }}>
-      <div style={{ marginLeft: 300 }}>
-        <IconButton
-          onClick={() => handleCarouselMove(false)}
-          sx={{ border: 2, marginBottom: 2 }}
-        >
-          <KeyboardArrowLeftRoundedIcon />
-        </IconButton>
-        <IconButton
-          onClick={() => handleCarouselMove()}
-          sx={{ border: 2, marginBottom: 2, marginLeft: 1 }}
-        >
-          <KeyboardArrowRightRoundedIcon />
-        </IconButton>
+    <div style={{ width: "100%" }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Typography sx={{ width: 300, display: 'flex', alignItems: 'center', paddingLeft: 2 }} variant="h4">
+          Total: {objectiveValue / 100 } €
+        </Typography>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton
+            onClick={() => handleCarouselMove(false)}
+            sx={{ border: 2, marginBottom: 2 }}
+          >
+            <KeyboardArrowLeftRoundedIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => handleCarouselMove()}
+            sx={{ border: 2, marginBottom: 2, marginLeft: 1 }}
+          >
+            <KeyboardArrowRightRoundedIcon />
+          </IconButton>
+        </div>
       </div>
       <div>
         <Box sx={{ display: "flex" }}>
@@ -209,91 +165,11 @@ const Carousel: React.FC<CarouselProps> = ({
                 )}
               </List>
             </div>
-            {Object.keys(solverResultGroupedGames).length > 0 ? (
-              <div>
-                {Object.keys(solverResultGroupedGames).map(
-                  (tournamentName, index) => (
-                    <Accordion
-                      elevation={0}
-                      expanded={openAccordions.includes(tournamentName)}
-                      onChange={() => {
-                        setOpenAccordions((prev) =>
-                          prev.includes(tournamentName)
-                            ? prev.filter((name) => name !== tournamentName)
-                            : [...prev, tournamentName]
-                        );
-                      }}
-                      key={index}
-                    >
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>{tournamentName}</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <List>
-                          <TableContainer>
-                            <Table
-                              sx={{ minWidth: 650 }}
-                              aria-label="simple table"
-                            >
-                              <TableBody>
-                                {solverResultGroupedGames[tournamentName].map(
-                                  (game, idx) => (
-                                    <TableRow
-                                      key={idx}
-                                      sx={{
-                                        "&:last-child td, &:last-child th": {
-                                          border: 0,
-                                        },
-                                      }}
-                                    >
-                                      <TableCell
-                                        component="th"
-                                        scope="row"
-                                        sx={{ width: 300, height: 130 }}
-                                      >
-                                        <ListItemText
-                                          primary={
-                                            <>
-                                              <Typography
-                                                variant="body2"
-                                                display="block"
-                                              >
-                                                {game.team_home}
-                                              </Typography>
-                                              <Typography
-                                                variant="body2"
-                                                display="block"
-                                              >
-                                                vs
-                                              </Typography>
-                                              <Typography
-                                                variant="body2"
-                                                display="block"
-                                              >
-                                                {game.team_away}
-                                              </Typography>
-                                            </>
-                                          }
-                                          secondary={`Starts at: ${game.starts_at}`}
-                                        />
-                                      </TableCell>
-                                    </TableRow>
-                                  )
-                                )}
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        </List>
-                      </AccordionDetails>
-                    </Accordion>
-                  )
-                )}
-              </div>
-            ) : (
-              <div style={{ width: 300, paddingRight: 5 }}>
-                <Skeleton animation="wave" sx={{ height: 48 }} />
-              </div>
-            )}
+            <GameAccordion
+              solverResultGroupedGames={solverResultGroupedGames}
+              openAccordions={openAccordions}
+              setOpenAccordions={setOpenAccordions}
+            />
           </div>
 
           <div className={"carousel-container"} ref={containerRef}>
@@ -301,6 +177,7 @@ const Carousel: React.FC<CarouselProps> = ({
               {loading
                 ? Array.from(new Array(3)).map((_, index) => (
                     <div className="carousel-slide" key={index}>
+                      <Button disabled>Remove</Button>
                       <PackageCard
                         packageName=""
                         packagePrice={0}

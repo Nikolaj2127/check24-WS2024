@@ -15,8 +15,8 @@ export default function Layout() {
   }, [location.pathname])
 
   return (
-    <DashboardLayout  defaultSidebarCollapsed={isSidebarCollapsed} sidebarExpandedWidth={200}>
-        <PageContainer maxWidth={'xl'}>
+    <DashboardLayout  defaultSidebarCollapsed={isSidebarCollapsed}>
+        <PageContainer maxWidthLg>
           <Outlet />
         </PageContainer>
     </DashboardLayout>

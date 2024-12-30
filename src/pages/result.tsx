@@ -6,7 +6,7 @@ import { chosenPackages, fetchSolverResult } from '../components/result/fetchSol
 import { ShowResult } from '../components/result/showResult';
 import ResultFiltering from '../components/result/resultFiltering';
 import { PageContainer } from '@toolpad/core';
-import Carousel from '../components/streamingPackages/carousel';
+import Carousel from '../components/result/carousel';
 
 
 export default function Result() {
