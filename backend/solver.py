@@ -31,17 +31,17 @@ def solver_function(input_json, merged_data):
     if comps:
         merged_data = merged_data[merged_data['tournament_name'].isin(comps)]
 
+    isLiveAndHighlights = False
+
     # Filter for live games or highlights
     if isLive and isHighlights:
-        merged_data = merged_data[(merged_data['highlights'] == 1) & (merged_data['live'] == 1)]
+        isLiveAndHighlights = True
     elif isLive and not isHighlights:
         merged_data = merged_data[merged_data['live'] == 1]
     elif isHighlights and not isLive:
         merged_data = merged_data[merged_data['highlights'] == 1]
     else:
         merged_data = merged_data
-        
-    print(merged_data)
 
     # Filter games within the date frame
     if dates:
@@ -49,6 +49,11 @@ def solver_function(input_json, merged_data):
         end_date = dates[1]
         if start_date and end_date:
             merged_data = merged_data[(merged_data['starts_at'] >= start_date) & (merged_data['starts_at'] <= end_date)]
+
+    # Give free packages a value of 1 cent because else the solver cant choose them
+    merged_data_filtered = merged_data
+    merged_data_filtered.loc[merged_data_filtered['monthly_price_cents'] == 0, 'monthly_price_cents'] = 1
+    merged_data_filtered.loc[merged_data_filtered['monthly_price_yearly_subscription_in_cents'] == 0, 'monthly_price_yearly_subscription_in_cents'] = 1
 
     # Create the mip solver with the SCIP backend.
     solver = pywraplp.Solver.CreateSolver("SCIP")
@@ -60,28 +65,43 @@ def solver_function(input_json, merged_data):
     infinity = solver.infinity()
     # Define the decision variables
     package_vars = {}
-    for pkg_id in merged_data['streaming_package_id'].unique():
+    for pkg_id in merged_data_filtered['streaming_package_id'].unique():
         package_vars[pkg_id] = solver.IntVar(0, infinity, str(pkg_id))
-
-    print(package_vars)
 
     print("Number of variables =", solver.NumVariables())
     
-    # Define the constraints (cover all selected games)
-    for game_id in merged_data['game_id'].unique():
-        relevant_packages = merged_data[merged_data['game_id'] == game_id]['streaming_package_id']
-        ct = solver.Constraint(1, infinity, f'ct_{game_id}')
-        for pkg_id in relevant_packages:
-            ct.SetCoefficient(package_vars[pkg_id], 1)
+    if not isLiveAndHighlights:
+        # Define the constraints (cover all selected games)
+        for game_id in merged_data_filtered['game_id'].unique():
+            relevant_packages = merged_data_filtered[merged_data_filtered['game_id'] == game_id]['streaming_package_id']
+            ct = solver.Constraint(1, infinity, f'ct_{game_id}')
+            for pkg_id in relevant_packages:
+                ct.SetCoefficient(package_vars[pkg_id], 1)
+    else:
+        for game_id in merged_data_filtered['game_id'].unique():
+            # Constraint for live coverage
+            live_packages = merged_data_filtered[(merged_data_filtered['game_id'] == game_id) & 
+                                                (merged_data_filtered['live'] == 1)]['streaming_package_id']
+            live_ct = solver.Constraint(1, infinity, f'live_ct_{game_id}')
+            for pkg_id in live_packages:
+                live_ct.SetCoefficient(package_vars[pkg_id], 1)
+        
+            # Constraint for highlights coverage
+            highlights_packages = merged_data_filtered[(merged_data_filtered['game_id'] == game_id) & 
+                                                    (merged_data_filtered['highlights'] == 1)]['streaming_package_id']
+            highlights_ct = solver.Constraint(1, infinity, f'highlights_ct_{game_id}')
+            for pkg_id in highlights_packages:
+                highlights_ct.SetCoefficient(package_vars[pkg_id], 1)
+
 
     print("Number of constraints =", solver.NumConstraints())
 
     # Objective Function
     if payment == 'yearly':
-        solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_yearly_subscription_in_cents'].iloc[0] for pkg_id in package_vars]))
+        solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data_filtered[merged_data_filtered['streaming_package_id'] == pkg_id]['monthly_price_yearly_subscription_in_cents'].iloc[0] for pkg_id in package_vars]))
         
     elif payment == 'monthly':
-        solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data[merged_data['streaming_package_id'] == pkg_id]['monthly_price_cents'].iloc[0] for pkg_id in package_vars]))
+        solver.Minimize(solver.Sum([package_vars[pkg_id] * merged_data_filtered[merged_data_filtered['streaming_package_id'] == pkg_id]['monthly_price_cents'].iloc[0] for pkg_id in package_vars]))
 
     print(f"Solving with {solver.SolverVersion()}")
     status = solver.Solve()

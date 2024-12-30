@@ -105,6 +105,7 @@ export default function DataTable<T extends bc_game | bc_streaming_package>({ fi
                     borderColor: "transparent"
                   },
                 }}
+                autosizeOnMount
                 rows={rows}
                 columns={filename === 'bc_game' ? bc_game_columns : bc_streaming_package_columns}
                 getRowId={filename === "bc_game" ? (row) => row.game_id : (row) => row.id}

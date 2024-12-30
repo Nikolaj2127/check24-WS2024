@@ -25,7 +25,7 @@ const NAVIGATION: Navigation = [
   },
   {
     segment: 'calculate_best_packages',
-    title: 'Calculate Best Package Combination',
+    title: 'Get Best Combination',
   },
   {
     segment: 'tournaments',

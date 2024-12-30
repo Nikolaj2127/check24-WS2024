@@ -119,49 +119,61 @@ export default function Result() {
 
   return ( 
     <Typography component="div">
-        <Typography variant="h4">
-          Best Package Combination:
-        </Typography>
-        <br/>
-        <ResultFiltering 
-          loading={loading} 
-          isYearly={isYearly}
-          handleYearlyClick={handleYearlyClick}
-          handleMonthlyClick={handleMonthlyClick}
-          handleLiveClick={handleLiveClick}
-          handleHighlightsClick={handleHighlightsClick}
-        />
-        <br/>
-        { !isCarousel ? (
-          <ShowResult solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
-        ) : (
-          <Carousel solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
-        )}
-        <br/>
-        {isYearly ? (
+      { solverResult.length > 0 || loading ? (
           <div>
-              The prices are monthly prices for a yearly subscription!
+            <Typography variant="h4">
+              Best Package Combination:
+            </Typography>
+            <br/>
+            <ResultFiltering 
+              loading={loading} 
+              isYearly={isYearly}
+              handleYearlyClick={handleYearlyClick}
+              handleMonthlyClick={handleMonthlyClick}
+              handleLiveClick={handleLiveClick}
+              handleHighlightsClick={handleHighlightsClick}
+            />
+            <br/>
+            { !isCarousel ? (
+              <ShowResult solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
+            ) : (
+              <Carousel solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null} isLiveAndHighlights={isLive && isHighlights}/>
+            )}
+            <br/>
+            {isYearly ? (
+              <div>
+                  The prices are monthly prices for a yearly subscription!
+              </div>
+            ) : null }
+            <br/>
+            <Button variant='contained' onClick={() => setIsCarousel(!isCarousel)}>Toggle Carousel</Button>
+            <br/>
+            <br/>
+            <Button variant="contained" onClick={() => navigate('/calculate_best_packages')}>Back</Button>
+            <br/>
+            <h1>Save Selection</h1>
+            <TextField
+                label="Collection Name"
+                value={textFieldValue}
+                onChange={(e) => setTextFieldValue(e.target.value)}
+                error={textFieldError}
+                helperText={textFieldError ? 'This field is required' : ''}
+            />
+            <br />
+            <br />
+            <Button type="button" variant="contained" color="primary" onClick={handleSaveTeamsButtonClick}>
+                Save Team Selection
+            </Button>
           </div>
-        ) : null }
-        <br/>
-        <Button variant='contained' onClick={() => setIsCarousel(!isCarousel)}>Toggle Carousel</Button>
-        <br/>
-        <br/>
-        <Button variant="contained" onClick={() => navigate('/calculate_best_packages')}>Back</Button>
-        <br/>
-        <h1>Save Selection</h1>
-        <TextField
-            label="Collection Name"
-            value={textFieldValue}
-            onChange={(e) => setTextFieldValue(e.target.value)}
-            error={textFieldError}
-            helperText={textFieldError ? 'This field is required' : ''}
-        />
-        <br />
-        <br />
-        <Button type="button" variant="contained" color="primary" onClick={handleSaveTeamsButtonClick}>
-            Save Team Selection
-        </Button>
+        ) : (
+          <div>
+            <br />
+              <div> Games cannot be covered by Streaming packages </div>
+            <br />
+          </div>
+        )
+      }
+        
     </Typography>
   )
 }

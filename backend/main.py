@@ -26,7 +26,7 @@ merged_data = mergeData(bc_game, bc_streaming_offer, bc_streaming_package)
 
 class SolveResponse(BaseModel):
     selected_packages: List[float]
-    objective_value: float
+    objective_value: float | None
     merged_data: List[dict]
     error: str
 
