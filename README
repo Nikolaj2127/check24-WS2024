@@ -1,0 +1,62 @@
+# Check24 Project
+
+## Overview
+This project is designed to [brief description of the project]. It aims to [purpose of the project].
+
+## Features
+- Feature 1: [description]
+- Feature 2: [description]
+- Feature 3: [description]
+
+## Installation
+To install the project, follow these steps:
+
+Clone the repository:
+```sh
+git clone https://github.com/yourusername/check24_project.git
+```
+
+# Frontend:
+
+1. Navigate to the project directory:
+```sh
+cd check24_project
+```
+2. Install the dependencies:
+```sh
+npm install
+```
+
+# Backend:
+
+1. Navigate to backend:
+```sh
+cd check24_project/backend
+```
+2. Install virtual python environment
+```sh
+python -m venv venv
+```
+3. Activate the virtual environment:
+```sh
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+```
+4. Install the required packages:
+```sh
+pip install -r requirements.txt
+```
+
+## Usage
+To run the frontend, use the following command:
+```sh
+npm start
+```
+To run the backend, use the following command in the backend directory:
+```sh
+if virtual environment is not activated use
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+fist
+```
+```sh
+python main.py
+```
