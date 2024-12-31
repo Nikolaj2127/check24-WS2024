@@ -1,5 +1,7 @@
 # Check24 Project
 
+The project is using a MIP Solver to find the best solution. It sends the data to the backend and filters it based on the criteria. In the solver, the variables and constraints are defined which are then used with the objective function to get the best package combination. The solver takes for all packages about 800 millisecondes.
+
 ## Installation
 To install the project, follow these steps:
 
