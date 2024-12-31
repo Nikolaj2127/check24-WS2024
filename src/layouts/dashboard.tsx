@@ -16,7 +16,7 @@ export default function Layout() {
 
   return (
     <DashboardLayout  defaultSidebarCollapsed={isSidebarCollapsed}>
-        <PageContainer maxWidthLg>
+        <PageContainer maxWidth="lg">
           <Outlet />
         </PageContainer>
     </DashboardLayout>

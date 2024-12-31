@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Typography from '@mui/material/Typography';
-import DataTable from '../components/DataTable'
+import DataTable from '../components/dataTable/DataTable'
 
 
 export default function GamesPage() {

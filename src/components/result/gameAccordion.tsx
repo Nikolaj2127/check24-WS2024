@@ -20,6 +20,7 @@ const GameAccordion: React.FC<GameAccordionProps> = ({solverResultGroupedGames, 
                 {Object.keys(solverResultGroupedGames).map(
                     (tournamentName, index) => (
                     <Accordion
+                        sx={{width: 300}}
                         elevation={0}
                         expanded={openAccordions.includes(tournamentName)}
                         onChange={() => {
@@ -38,8 +39,7 @@ const GameAccordion: React.FC<GameAccordionProps> = ({solverResultGroupedGames, 
                         <List>
                             <TableContainer>
                             <Table
-                                sx={{ minWidth: 650 }}
-                                aria-label="simple table"
+                                aria-label="groupedGames"
                             >
                                 <TableBody>
                                 {solverResultGroupedGames[tournamentName].map(

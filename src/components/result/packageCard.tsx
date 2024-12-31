@@ -1,28 +1,10 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Skeleton } from '@mui/material';
 import { formatPrice } from '../utils/formatPrice';
-import { Game } from './showResult';
-
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-interface solverResultGames {
-  tournamentName: string;
-  startsAt: string;
-  teamHome: string;
-  teamAway: string;
-}
+import { Game } from './fetchSolverResult';
 
 interface PackageCardProps {
   packageName: string
@@ -32,42 +14,7 @@ interface PackageCardProps {
   onExpandChange?: (isExpanded: boolean) => void;
 }
 
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme }) => ({
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
-  variants: [
-    {
-      props: ({ expand }) => !expand,
-      style: {
-        transform: 'rotate(0deg)',
-      },
-    },
-    {
-      props: ({ expand }) => !!expand,
-      style: {
-        transform: 'rotate(180deg)',
-      },
-    },
-  ],
-}));
-
-
-export default function PackageCard({ packageName, packagePrice, loading, onExpandChange }: PackageCardProps): JSX.Element {
-  const [expanded, setExpanded] = useState(false);
-
-  const handleExpandClick = () => {
-    const newExpanded = !expanded;
-    setExpanded(newExpanded);
-    if (onExpandChange) {
-      onExpandChange(newExpanded);
-    }
-  };
-
+export default function PackageCard({ packageName, packagePrice, loading }: PackageCardProps): JSX.Element {
   return (
     <Card sx={{ width: 300 }}>
       {loading ? (
@@ -76,7 +23,7 @@ export default function PackageCard({ packageName, packagePrice, loading, onExpa
         <CardMedia
         component="img"
         height="194"
-        image="/T-Magenta_newsroom.png"
+        image={`/images/packageLogos/${packageName}.png`}
         alt="Logo"
         />
       )}
@@ -96,20 +43,6 @@ export default function PackageCard({ packageName, packagePrice, loading, onExpa
         )}
         </Typography>
       </CardContent>
-      {/* <CardActions disableSpacing>
-        <ExpandMore
-          expand={expanded}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-        >
-          <ExpandMoreIcon />
-        </ExpandMore>
-      </CardActions>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-        </CardContent>
-      </Collapse> */}
     </Card>
   );
 }

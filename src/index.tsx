@@ -7,14 +7,12 @@ import DashboardPage from './pages/index';
 import GamesPage from './pages/games';
 import StreamingPackagesPage from './pages/streamingPackages';
 import CalculateBestPackagesPage from './pages/calculateBestPackages';
-import teamCollections from './pages/teamCollections';
 import Result from './pages/result';
-import Test from './pages/test';
 import Tournament from './pages/tournament';
 
 const router = createBrowserRouter([
   {
-    Component: App, // root layout route
+    Component: App,
     children: [
       {
         path: '/',
@@ -41,17 +39,9 @@ const router = createBrowserRouter([
             Component: Tournament,
           },
           {
-            path: '/collections',
-            Component: teamCollections,
-          },
-          {
             path: '/calculate_best_packages/result',
             Component: Result,
           },
-          {
-            path: '/test',
-            Component: Test,
-          }
         ],
       },
     ],

@@ -15,7 +15,6 @@ export default function Tournament() {
     const [teamRows, setTeamRows] = useState<TeamType[]>([]);
     const [filteredTeams, setFilteredTeams] = useState<TeamType[]>([]);
     const [selectedTeamsCheckbox, setSelectedTeamsCheckbox] = useState<TeamType[]>([]);
-    const [selectedRowIds, setSelectedRowIds] = useState<GridRowId[]>([]);
     const [selectedCompRowIds, setSelectedCompRowIds] = useState<GridRowId[]>([]);
     const [dates, setDates] = useState<string[]>([])
     
@@ -117,7 +116,7 @@ export default function Tournament() {
                     <Grid container spacing={2}>
                         {filteredTeams.map((team) => (
                             <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={team.id}>
-                                <Box sx={{backgroundColor: 'var(--primary)', borderRadius: 1, width: 250, height: 50, display: 'flex', justifyContent: 'left', alignItems: 'center', paddingLeft: 2}}>
+                                <Box sx={{backgroundColor: 'var(--primary)', borderRadius: 1, width: 200, height: 50, display: 'flex', justifyContent: 'left', alignItems: 'center', paddingLeft: 2}}>
                                 <FormControlLabel
                                     control={
                                         <Checkbox

@@ -31,18 +31,6 @@ const NAVIGATION: Navigation = [
     segment: 'tournaments',
     title: 'Tournaments',
   },
-  {
-    segment: 'collections',
-    title: 'Collections',
-  },
-  {
-    kind: 'header',
-    title: 'Testing',
-  },
-  {
-    segment: 'test',
-    title: 'Test',
-  },
 ];
 
 const BRANDING = {

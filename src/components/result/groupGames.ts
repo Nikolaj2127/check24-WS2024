@@ -1,5 +1,6 @@
-import { Game } from "./showResult";
+
 import _ from "lodash";
+import { Game } from "./fetchSolverResult";
 
 export const group = (array: any) => {
       const gameMap = new Map();

@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react';
-import Papa from 'papaparse'
-
 export interface bc_game {
     id: number;
     team_home: string;
@@ -31,10 +28,22 @@ export interface teams {
     tournament_name: string;
 }
 
+export interface merged_data {
+    game_id: number;
+    team_home: string;
+    team_away: string;
+    starts_at: string;
+    tournament_name: string;
+    streaming_package_name: string;
+    monthly_price_cents: number;
+    monthly_price_yearly_subscription_in_cents: number;
+    livehighlights: string;
+}
+
 let bc_game: bc_game[] = [];
 let bc_streaming_offer: bc_streaming_offer[] = [];
 let bc_streaming_package: bc_streaming_package[] = [];
-let merged_data: any = [];
+let merged_data: merged_data[] = [];
 
 export async function fetchData(filename: string) {
     

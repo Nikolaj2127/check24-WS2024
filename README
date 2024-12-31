@@ -1,13 +1,5 @@
 # Check24 Project
 
-## Overview
-This project is designed to [brief description of the project]. It aims to [purpose of the project].
-
-## Features
-- Feature 1: [description]
-- Feature 2: [description]
-- Feature 3: [description]
-
 ## Installation
 To install the project, follow these steps:
 
@@ -60,3 +52,25 @@ fist
 ```sh
 python main.py
 ```
+
+
+## Improvements
+
+# General
+1. Add more Images for all packages (and higher quality)
+2. Add a comaprison with the month span function where when it is cheaper to buy monthly packages, a popup appears with the information
+3. Add caching to save the latest games (Didnt have time for that)
+
+# Algorithm
+1. Fix the issue with Hihglights and Live games not being covered acurately (Something with the constraints is off but idk what)
+2. Experiment with different solvers to gain a greater performance boost (consider payed ones: Gurobi, CPLEX) e.g COIN-OR, MIPCL (GLPK is too slow with large data, same with lp solve)
+
+# Tournaments
+1. Add Teams selection (like Tournament page)
+2. Maybe allow multiple Tournaments/ Teams to be selected and structure the team selection like tabs
+
+# Result
+1. Specitfy timeframe in filtering
+2. Fix bug where the site sometimes needs to be reloaded to show the price
+3. Control the deselection of the filters through the checkboxes
+4. Show 0 as total price when a free package is selected

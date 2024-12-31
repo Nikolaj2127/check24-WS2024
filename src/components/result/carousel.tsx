@@ -9,21 +9,16 @@ import {
   ListItemButton,
   ListItemText,
   Skeleton,
-  Table,
-  TableBody,
-  TableContainer,
-  TableRow,
   Typography,
 } from "@mui/material";
-import { chosenPackages } from "../result/fetchSolverResult";
-import { Game } from "../result/showResult";
+import { chosenPackages, Game } from "../result/fetchSolverResult";
 import _ from "lodash";
-
 import { group } from "./groupGames";
 import "./carousel.css";
 import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import GameAccordion from "./gameAccordion";
+
 
 //TODO: Make Package Name sticky
 

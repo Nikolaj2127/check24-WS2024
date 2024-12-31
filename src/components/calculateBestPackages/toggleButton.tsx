@@ -7,29 +7,18 @@ interface ToggleButtonProps {
 }
 
 const ToggleButton: React.FC<ToggleButtonProps> = ({ isFiltered, handleFiltersToggleClick }) => {
+    // This button toggles between showing all options or filtered options
     return (
         <div>
-            {isFiltered ? (
-              <Button
+            <Button
                 sx={{ backgroundColor: '#284366', border: 2, borderColor: 'white', color: 'white'}}
                 type="button"
                 variant="contained"
                 color="primary"
                 onClick={handleFiltersToggleClick}
-              >
-                Show all options
-              </Button>
-            ) : (
-              <Button
-                sx={{ backgroundColor: '#284366', border: 2, borderColor: 'white', color: 'white'}}
-                type="button"
-                variant="contained"
-                color="primary"
-                onClick={handleFiltersToggleClick}
-              >
-                Show filtered options
-              </Button>
-            )}
+            >
+                {isFiltered ? 'Show all options' : 'Show filtered options'}
+            </Button>
         </div>
     );
 };

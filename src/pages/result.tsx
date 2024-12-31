@@ -3,21 +3,23 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, Typography, TextField } from '@mui/material';
 import { GridRowId } from '@mui/x-data-grid';
 import { chosenPackages, fetchSolverResult } from '../components/result/fetchSolverResult';
-import { ShowResult } from '../components/result/showResult';
 import ResultFiltering from '../components/result/resultFiltering';
-import { PageContainer } from '@toolpad/core';
 import Carousel from '../components/result/carousel';
+import dayjs from 'dayjs';
+import minMax from 'dayjs/plugin/minMax'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+
+dayjs.extend(minMax);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 
 export default function Result() {
     const location = useLocation()
     const navigate = useNavigate()
-    const [textFieldValue, setTextFieldValue] = useState('')
-    const [textFieldError, setTextFieldError] = useState(false)
     const selectedTeams = location.state?.selectedTeams
     const selectedComps= location.state?.selectedComps
-    const selectedRowIds = location.state?.selectedRowIds as GridRowId[]
-    const teamRows = location.state?.teamRows as { id: number, team: string }[]
     const dates = location.state?.dates
     const [isYearly, setIsYearly] = useState(true)
     const [isLive, setIsLive] = useState(true)
@@ -26,19 +28,18 @@ export default function Result() {
     const [objectiveValue, setObjectiveValue] = useState<number>()
     const [solverResultGames, setSolverResultGames] = useState<any[]>([])
     const [loading, setLoading] = useState<'yearly' | 'monthly' | 'live' | 'highlights' | null>('yearly');
-    const [isCarousel, setIsCarousel] = useState(true)
+    const [monthsSpan, setMonthsSpan] = useState(0)
 
     console.log('selecTeams', selectedTeams)
 
-    const handleYearlyClick = () => {
-      setIsYearly(true)
-      setLoading('yearly')
-    };
-
-    const handleMonthlyClick = () => {
-      setIsYearly(false)
-      setLoading('monthly')
+    function handleSubscription(type: 'yearly' | 'monthly') {
+      setIsYearly(type === 'yearly');
+      setLoading(type);
     }
+
+    const handleYearlyClick = () => handleSubscription('yearly');
+
+    const handleMonthlyClick = () => handleSubscription('monthly');
 
     const handleLiveClick = (status: string) => {
       if(status === 'set') {
@@ -86,36 +87,26 @@ export default function Result() {
       setSolverResult(result.chosenPackages)
       setObjectiveValue(result.objectiveValue)
       setSolverResultGames(result.solverResultGames)
+      setMonthsSpan(calculateMonthsSpan(result.solverResultGames))
       setLoading(null)
     }
 
-    const handleSaveTeamsButtonClick = async () => {
-      if (textFieldValue.trim() === '') {
-          setTextFieldError(true);
-          return;
+    function calculateMonthsSpan(games: any[]) {
+      console.log('gamLens',games.length)
+      if (games.length === 0) return 0;
+    
+      const dates = games.map(game => dayjs(game.starts_at));
+      const minDate = dayjs.min(dates);
+      const maxDate = dayjs.max(dates);
+      
+      console.log('minDate', minDate)
+      console.log('maxDate', maxDate)
+
+      if (maxDate) {
+        return maxDate.diff(minDate, 'month') + 1;
       }
-      setTextFieldError(false);
-      const selectedTeams = selectedRowIds.map(id => teamRows.find(row => row.id === id)?.team).filter(Boolean) as string[];
-      console.log("collection Name: ", textFieldValue)
-      try {
-          const response = await fetch('http://localhost:4000/saveTeams', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ collectionName: textFieldValue, teams: selectedTeams }),
-          });
-  
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-  
-          const result = await response.json();
-          console.log('Teams saved successfully:', result);
-      } catch (error) {
-          console.error('Error saving teams:', error);
-      }
-  }
+      return 0;
+    }
 
   return ( 
     <Typography component="div">
@@ -133,12 +124,8 @@ export default function Result() {
               handleLiveClick={handleLiveClick}
               handleHighlightsClick={handleHighlightsClick}
             />
-            <br/>
-            { !isCarousel ? (
-              <ShowResult solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null}/>
-            ) : (
-              <Carousel solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null} isLiveAndHighlights={isLive && isHighlights}/>
-            )}
+            <br/>  
+            <Carousel solverResult={solverResult} solverResultGames={solverResultGames} objectiveValue={objectiveValue ?? 0} loading={loading !== null} isLiveAndHighlights={isLive && isHighlights}/>
             <br/>
             {isYearly ? (
               <div>
@@ -146,24 +133,9 @@ export default function Result() {
               </div>
             ) : null }
             <br/>
-            <Button variant='contained' onClick={() => setIsCarousel(!isCarousel)}>Toggle Carousel</Button>
-            <br/>
             <br/>
             <Button variant="contained" onClick={() => navigate('/calculate_best_packages')}>Back</Button>
             <br/>
-            <h1>Save Selection</h1>
-            <TextField
-                label="Collection Name"
-                value={textFieldValue}
-                onChange={(e) => setTextFieldValue(e.target.value)}
-                error={textFieldError}
-                helperText={textFieldError ? 'This field is required' : ''}
-            />
-            <br />
-            <br />
-            <Button type="button" variant="contained" color="primary" onClick={handleSaveTeamsButtonClick}>
-                Save Team Selection
-            </Button>
           </div>
         ) : (
           <div>

@@ -3,11 +3,10 @@ import { useState, useEffect } from 'react';
 import { Box, Skeleton } from '@mui/material';
 import { DataGrid, GridColDef, gridClasses } from '@mui/x-data-grid';
 import { PageContainer } from '@toolpad/core';
-import { fetchData, bc_game, bc_streaming_package } from './dataFetching/fetchData';
+import { fetchData, bc_game, bc_streaming_package } from '../dataFetching/fetchData';
 import CustomToolbar from './customToolbar';
-import { formatPrice } from './utils/formatPrice';
-import '../index.css';
-import '../css/glowBorder.css';
+import { formatPrice } from '../utils/formatPrice';
+import '../../index.css';
 
 const bc_game_columns: readonly GridColDef[] = [
   { field: 'team_home', headerName: 'Team Home', minWidth: 200, headerClassName: 'header-left' },

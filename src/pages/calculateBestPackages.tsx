@@ -61,10 +61,7 @@ export default function CalculateBestPackagesPage() {
   const [dates, setDates] = useState<string[]>([])
 
   useEffect(() => {
-    console.log(dates)
-  }, [dates])
-
-  useEffect(() => {
+    // Fetch initial data for teams and competitions
     const getData = async () => {
       const [{ teams, comps }] = (await fetchData(
         "comps_teams"
@@ -89,54 +86,51 @@ export default function CalculateBestPackagesPage() {
     getData();
   }, []);
 
+  const filterCompsBySelectedTeams = (selection: readonly GridRowId[]) => {
+    // Filter competitions based on selected teams
+    const selectedTeamCompNames = new Set<string>();
+    teamRows.forEach((team) => {
+      if (selection.includes(team.id)) {
+        team.compNames.forEach((compName) =>
+          selectedTeamCompNames.add(compName)
+        );
+      }
+    });
+
+    const newFilteredComps = compRows.filter((comp) =>
+      selectedTeamCompNames.has(comp.competition)
+    );
+    setFilteredComps(newFilteredComps);
+  };
+
+  const filterTeamsBySelectedComps = (selection: readonly GridRowId[]) => {
+    const selectedCompTeamNames = new Set<string>();
+    compRows.forEach((comp) => {
+      if (selection.includes(comp.id)) {
+        comp.teamNames.forEach((teamName) =>
+          selectedCompTeamNames.add(teamName)
+        );
+      }
+    });
+
+    const newFilteredTeams = teamRows.filter((team) =>
+      selectedCompTeamNames.has(team.teamName)
+    );
+    setFilteredTeams(newFilteredTeams);
+  };
+
   const handleTeamSelectionChange = (selectionModel: readonly GridRowId[]) => {
     setSelectedRowIds([...selectionModel]);
-
-    if (selectionModel.length === 0) {
-      // No teams selected, show all competitions
-      setFilteredComps(compRows);
-    } else {
-      // Collect all competition names from selected teams
-      const selectedTeamCompNames = new Set<string>();
-      teamRows.forEach((team) => {
-        if (selectionModel.includes(team.id)) {
-          team.compNames.forEach((compName) =>
-            selectedTeamCompNames.add(compName)
-          );
-        }
-      });
-
-      // Filter competitions based on collected competition names
-      const newFilteredComps = compRows.filter((comp) =>
-        selectedTeamCompNames.has(comp.competition)
-      );
-      setFilteredComps(newFilteredComps);
-    }
+    selectionModel.length === 0
+      ? setFilteredComps(compRows)
+      : filterCompsBySelectedTeams(selectionModel);
   };
 
   const handleCompSelectionChange = (selectionModel: readonly GridRowId[]) => {
     setSelectedCompRowIds([...selectionModel]);
-
-    if (selectionModel.length === 0) {
-      // No competitions selected, show all teams
-      setFilteredTeams(teamRows);
-    } else {
-      // Collect all team names from selected competitions
-      const selectedCompTeamNames = new Set<string>();
-      compRows.forEach((comp) => {
-        if (selectionModel.includes(comp.id)) {
-          comp.teamNames.forEach((teamName) =>
-            selectedCompTeamNames.add(teamName)
-          );
-        }
-      });
-
-      // Filter teams based on collected team names
-      const newFilteredTeams = teamRows.filter((team) =>
-        selectedCompTeamNames.has(team.teamName)
-      );
-      setFilteredTeams(newFilteredTeams);
-    }
+    selectionModel.length === 0
+      ? setFilteredTeams(teamRows)
+      : filterTeamsBySelectedComps(selectionModel);
   };
 
   const handleFiltersToggleClick = () => {
@@ -144,6 +138,7 @@ export default function CalculateBestPackagesPage() {
   };
 
   const handleButtonClick = () => {
+    // Navigate to the result page if any items are selected
     if (selectedRowIds.length > 0 || selectedCompRowIds.length > 0) {
       const selectedTeams = selectedRowIds
         .map((id) => teamRows.find((row) => row.id === id)?.teamName)
@@ -163,6 +158,7 @@ export default function CalculateBestPackagesPage() {
   };
 
   return (
+    // Render UI components and data grids
         <Typography component="div">
           <Box display="flex" justifyContent="space-between" width="100%">
             <ToggleButton isFiltered={isFiltered} handleFiltersToggleClick={handleFiltersToggleClick}/>
@@ -189,10 +185,7 @@ export default function CalculateBestPackagesPage() {
                 <Box>
                   <MyDateRangePicker setDates={setDates}/>
                 </Box>
-                  <Box sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                  }}>
+                  <Box sx={{display: 'flex', flexWrap: 'wrap' }}>
                     <Box>
                       <ShowSelectedItems itemIds={selectedRowIds} rows={teamRows} type={'teams'} />
                     </Box>

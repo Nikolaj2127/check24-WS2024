@@ -7,7 +7,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
 
   return (
-    <Typography component="div">
+    <Typography component="div" sx={{marginX: 20}}>
       <Box sx={{
         display: 'flex',
         alignItems: 'center',
@@ -25,10 +25,10 @@ export default function DashboardPage() {
         marginBottom: 4,
         mx: 10
       }}>
-          <Button onClick={() => navigate("/streaming_packages")} sx={{width: "100%", border: 1, height: 200, borderRadius: 15}}>
+          <Button onClick={() => navigate("/streaming_packages")} sx={{width: "100%", border: 1, height: 100, borderRadius: 15}}>
             See supported packages
           </Button>
-          <Button onClick={() => navigate("/games")} sx={{width: "100%", border: 1, height: 200, borderRadius: 15}}>
+          <Button onClick={() => navigate("/games")} sx={{width: "100%", border: 1, height: 100, borderRadius: 15}}>
             See supported games
           </Button>
       </Box>
